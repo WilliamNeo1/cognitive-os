@@ -1,0 +1,47 @@
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const q = searchParams.get("q");
+
+    if (!q) {
+      return Response.json({
+        ok: false,
+        error: "missing query",
+      });
+    }
+
+    const { data, error } = await supabase.rpc(
+      "search_router_v2",
+      {
+        q,
+      }
+    );
+
+    if (error) {
+      return Response.json({
+        ok: false,
+        error,
+      });
+    }
+
+    return Response.json({
+      ok: true,
+      query: q,
+      result: data,
+    });
+
+  } catch (err) {
+    return Response.json({
+      ok: false,
+      error: err.message,
+    });
+  }
+}
