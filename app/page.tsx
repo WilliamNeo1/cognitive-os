@@ -49,30 +49,17 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
 
 function ResultCard({ r, index }: { r: Result; index: number }) {
   const [open, setOpen] = useState(false);
-  const finalPct = Math.round((r.scores.final ?? 0) * 100);
-  const color = scoreColor(r.scores.final ?? 0);
-
+  const finalPct = Math.round((r.scores?.final ?? 0) * 100);
+  const color = scoreColor(r.scores?.final ?? 0);
   return (
-    <div
-      onClick={() => setOpen(!open)}
-      style={{
-        marginBottom: 12, padding: 20,
-        background: '#0c0c0c',
-        border: open ? '1px solid #2a2a2a' : '1px solid #181818',
-        cursor: 'pointer',
-      }}
-    >
+    <div onClick={() => setOpen(!open)} style={{ marginBottom: 12, padding: 20, background: '#0c0c0c', border: open ? '1px solid #2a2a2a' : '1px solid #181818', cursor: 'pointer' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' as const }}>
-          <span style={{ color: '#333', fontSize: 11, fontWeight: 700, letterSpacing: 2 }}>
-            #{String(index + 1).padStart(2, '0')}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span style={{ color: '#333', fontSize: 11, fontWeight: 700, letterSpacing: 2 }}>#{String(index + 1).padStart(2, '0')}</span>
           <span style={{ color: '#444', fontSize: 11 }}>DOC {r.document_id}</span>
           <div style={{ display: 'flex', gap: 6 }}>
-            {r.sources.map(s => (
-              <span key={s} style={{ padding: '2px 8px', background: '#141414', border: '1px solid #202020', fontSize: 10, color: '#555', letterSpacing: 1 }}>
-                {s}
-              </span>
+            {(r.sources ?? []).map((s: string) => (
+              <span key={s} style={{ padding: '2px 8px', background: '#141414', border: '1px solid #202020', fontSize: 10, color: '#555' }}>{s}</span>
             ))}
           </div>
         </div>
@@ -81,22 +68,17 @@ function ResultCard({ r, index }: { r: Result; index: number }) {
           <span style={{ fontSize: 11, color: '#444' }}>分</span>
         </div>
       </div>
-
-      <p style={{ margin: '0 0 16px', fontSize: 13, lineHeight: 1.7, color: '#777', borderLeft: '2px solid #1a1a1a', paddingLeft: 12 }}>
-        {r.content_preview}
-      </p>
-
-      <ScoreBar label="关键词" value={r.scores.keyword ?? 0} />
-      <ScoreBar label="实体"   value={r.scores.entity   ?? 0} />
-      <ScoreBar label="图谱"   value={r.scores.graph    ?? 0} />
-      <ScoreBar label="可信度" value={r.scores.confidence ?? 0.5} />
-
+      <p style={{ margin: '0 0 16px', fontSize: 13, lineHeight: 1.7, color: '#777', borderLeft: '2px solid #1a1a1a', paddingLeft: 12 }}>{r.content_preview}</p>
+      <ScoreBar label="关键词" value={r.scores?.keyword ?? 0} />
+      <ScoreBar label="实体"   value={r.scores?.entity   ?? 0} />
+      <ScoreBar label="图谱"   value={r.scores?.graph    ?? 0} />
+      <ScoreBar label="可信度" value={r.scores?.confidence ?? 0.5} />
       {open && (
         <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #151515' }}>
-          {r.active_signals.length > 0 && (
+          {(r.active_signals ?? []).length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, color: '#555', letterSpacing: 2, textTransform: 'uppercase' as const, marginBottom: 8 }}>⚡ 风险信号</div>
-              {r.active_signals.map((s, i) => (
+              <div style={{ fontSize: 10, color: '#555', letterSpacing: 2, marginBottom: 8 }}>⚡ 风险信号</div>
+              {r.active_signals.map((s: Signal, i: number) => (
                 <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, padding: '8px 10px', background: '#0a0a0a', border: '1px solid #141414' }}>
                   <span style={{ padding: '2px 8px', fontSize: 10, background: '#ff440022', color: '#ff6644' }}>{s.type}</span>
                   <span style={{ fontSize: 12, color: '#777', flex: 1 }}>{s.text}</span>
@@ -104,51 +86,55 @@ function ResultCard({ r, index }: { r: Result; index: number }) {
               ))}
             </div>
           )}
-          {r.contradictions.length > 0 && (
+          {(r.contradictions ?? []).length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, color: '#555', letterSpacing: 2, textTransform: 'uppercase' as const, marginBottom: 8 }}>⊘ 反证层</div>
-              {r.contradictions.map((c, i) => (
+              <div style={{ fontSize: 10, color: '#555', letterSpacing: 2, marginBottom: 8 }}>⊘ 反证层</div>
+              {r.contradictions.map((c: Contradiction, i: number) => (
                 <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, padding: '8px 10px', background: '#0a0a0a', border: '1px solid #141414' }}>
                   <span style={{ padding: '2px 8px', fontSize: 10, background: '#44444422', color: '#888' }}>{c.severity}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, color: '#777' }}>{c.text}</div>
-                    {c.alternative && <div style={{ fontSize: 11, color: '#555', marginTop: 4, fontStyle: 'italic' as const }}>替代解释：{c.alternative}</div>}
+                    {c.alternative && <div style={{ fontSize: 11, color: '#555', marginTop: 4, fontStyle: 'italic' }}>替代解释：{c.alternative}</div>}
                   </div>
                 </div>
               ))}
             </div>
           )}
-          {r.active_signals.length === 0 && r.contradictions.length === 0 && (
-            <div style={{ fontSize: 11, color: '#333', textAlign: 'center' as const, padding: '16px 0' }}>暂无风险信号或反证记录</div>
+          {(r.active_signals ?? []).length === 0 && (r.contradictions ?? []).length === 0 && (
+            <div style={{ fontSize: 11, color: '#333', textAlign: 'center', padding: '16px 0' }}>暂无风险信号或反证记录</div>
           )}
         </div>
       )}
-
-      <div style={{ marginTop: 14, textAlign: 'right' as const }}>
-        <span style={{ fontSize: 10, color: '#333', letterSpacing: 1 }}>{open ? '收起 ▲' : '展开详情 ▼'}</span>
+      <div style={{ marginTop: 14, textAlign: 'right' }}>
+        <span style={{ fontSize: 10, color: '#333' }}>{open ? '收起 ▲' : '展开详情 ▼'}</span>
       </div>
     </div>
   );
 }
 
 export default function Home() {
-  const [user, setUser]     = useState<any>(null);
-  const [email, setEmail]   = useState('');
+  const [user, setUser]         = useState<any>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [message, setMessage]   = useState('');
   const [isRegister, setIsRegister] = useState(false);
-  const [q, setQ]           = useState('');
-  const [results, setResults] = useState<Result[]>([]);
-  const [meta, setMeta]     = useState<{ query: string; count: number } | null>(null);
+  const [q, setQ]               = useState('');
+  const [results, setResults]   = useState<Result[]>([]);
+  const [meta, setMeta]         = useState<{ query: string; count: number } | null>(null);
   const [searching, setSearching] = useState(false);
-  const [entities, setEntities]   = useState<ResolvedEntity[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const [entities, setEntities] = useState<ResolvedEntity[]>([]);
 
   useEffect(() => {
-    setMounted(true);
-    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setUser(s?.user ?? null));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthReady(true);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => {
+      setUser(s?.user ?? null);
+      setAuthReady(true);
+    });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -174,40 +160,48 @@ export default function Home() {
     setResults([]);
     setMeta(null);
     setEntities([]);
-    const res  = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-    const json = await res.json();
-    if (json.ok) {
-      setResults(json.results ?? []);
-      setMeta({ query: json.query, count: json.count });
-      const first = json.results?.[0];
-      if (first?.resolved_entities?.length) setEntities(first.resolved_entities.slice(0, 4));
+    try {
+      const res  = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const json = await res.json();
+      if (json.ok && Array.isArray(json.results)) {
+        setResults(json.results);
+        setMeta({ query: json.query, count: json.count });
+        const first = json.results[0];
+        if (first?.resolved_entities?.length) {
+          setEntities(first.resolved_entities.slice(0, 4));
+        }
+      }
+    } catch (err) {
+      console.error(err);
     }
     setSearching(false);
   };
 
-  if (!mounted) return null;
+  if (!authReady) return (
+    <main style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span style={{ color: '#00ff9d', fontFamily: 'monospace' }}>⬡</span>
+    </main>
+  );
 
   if (!user) return (
     <main style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Courier New', monospace" }}>
       <div style={{ width: 360, padding: '48px 40px', border: '1px solid #222', background: '#0e0e0e' }}>
         <div style={{ fontSize: 32, color: '#00ff9d', marginBottom: 8 }}>⬡</div>
         <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, letterSpacing: 8, color: '#fff' }}>RSAL</h1>
-        <p style={{ margin: '0 0 32px', fontSize: 11, color: '#555', letterSpacing: 2, textTransform: 'uppercase' as const }}>Reality Survival Analysis Laboratory</p>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' as const, gap: 12 }}>
-          <input style={{ background: '#111', border: '1px solid #2a2a2a', color: '#ccc', padding: '10px 14px', fontSize: 14, fontFamily: "'Courier New', monospace", outline: 'none' }}
+        <p style={{ margin: '0 0 32px', fontSize: 11, color: '#555', letterSpacing: 2 }}>Reality Survival Analysis Laboratory</p>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input style={{ background: '#111', border: '1px solid #2a2a2a', color: '#ccc', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit', outline: 'none' }}
             value={email} onChange={e => setEmail(e.target.value)} placeholder="电子邮件" type="email" />
-          <input style={{ background: '#111', border: '1px solid #2a2a2a', color: '#ccc', padding: '10px 14px', fontSize: 14, fontFamily: "'Courier New', monospace", outline: 'none' }}
+          <input style={{ background: '#111', border: '1px solid #2a2a2a', color: '#ccc', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit', outline: 'none' }}
             value={password} onChange={e => setPassword(e.target.value)} placeholder="密码" type="password" />
-          <button style={{ background: '#00ff9d', color: '#000', border: 'none', padding: 12, fontSize: 13, fontWeight: 700, letterSpacing: 2, cursor: 'pointer', textTransform: 'uppercase' as const }}
-            type="submit" disabled={loading}>
-            {loading ? '处理中...' : isRegister ? '注册' : '登录'}
-          </button>
+          <button style={{ background: '#00ff9d', color: '#000', border: 'none', padding: 12, fontSize: 13, fontWeight: 700, letterSpacing: 2, cursor: 'pointer' }}
+            type="submit" disabled={loading}>{loading ? '处理中...' : isRegister ? '注册' : '登录'}</button>
         </form>
-        <p style={{ marginTop: 20, fontSize: 12, color: '#444', cursor: 'pointer', textAlign: 'center' as const }}
+        <p style={{ marginTop: 20, fontSize: 12, color: '#444', cursor: 'pointer', textAlign: 'center' }}
           onClick={() => setIsRegister(!isRegister)}>
           {isRegister ? '已有账号？登录' : '没有账号？注册'}
         </p>
-        {message && <p style={{ marginTop: 12, fontSize: 12, color: '#ff6b6b', textAlign: 'center' as const }}>{message}</p>}
+        {message && <p style={{ marginTop: 12, fontSize: 12, color: '#ff6b6b', textAlign: 'center' }}>{message}</p>}
       </div>
     </main>
   );
@@ -222,16 +216,14 @@ export default function Home() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{ fontSize: 11, color: '#444' }}>{user.email}</span>
           <button onClick={() => supabase.auth.signOut()}
-            style={{ background: 'transparent', border: '1px solid #222', color: '#555', padding: '4px 12px', fontSize: 11, cursor: 'pointer' }}>
-            退出
-          </button>
+            style={{ background: 'transparent', border: '1px solid #222', color: '#555', padding: '4px 12px', fontSize: 11, cursor: 'pointer' }}>退出</button>
         </div>
       </header>
 
       <section style={{ padding: '32px 32px 0' }}>
         <div style={{ display: 'flex', maxWidth: 800 }}>
           <input
-            style={{ flex: 1, background: '#0e0e0e', border: '1px solid #2a2a2a', borderRight: 'none', color: '#fff', padding: '14px 20px', fontSize: 15, fontFamily: "'Courier New', monospace", outline: 'none' }}
+            style={{ flex: 1, background: '#0e0e0e', border: '1px solid #2a2a2a', borderRight: 'none', color: '#fff', padding: '14px 20px', fontSize: 15, fontFamily: 'inherit', outline: 'none' }}
             value={q}
             onChange={e => setQ(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && search()}
@@ -239,7 +231,7 @@ export default function Home() {
             autoFocus
           />
           <button onClick={search} disabled={searching}
-            style={{ background: '#00ff9d', color: '#000', border: 'none', padding: '14px 28px', fontSize: 13, fontWeight: 700, cursor: 'pointer', letterSpacing: 2, whiteSpace: 'nowrap' as const }}>
+            style={{ background: '#00ff9d', color: '#000', border: 'none', padding: '14px 28px', fontSize: 13, fontWeight: 700, cursor: 'pointer', letterSpacing: 2, whiteSpace: 'nowrap' }}>
             {searching ? '···' : '搜索'}
           </button>
         </div>
@@ -259,15 +251,13 @@ export default function Home() {
           </div>
 
           {entities.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: 10, marginBottom: 20, padding: '10px 14px', background: '#0d0d0d', border: '1px solid #1a1a1a' }}>
-              <span style={{ fontSize: 10, color: '#444', letterSpacing: 2, textTransform: 'uppercase' as const }}>实体解析 →</span>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 20, padding: '10px 14px', background: '#0d0d0d', border: '1px solid #1a1a1a' }}>
+              <span style={{ fontSize: 10, color: '#444', letterSpacing: 2 }}>实体解析 →</span>
               {entities.map((e, i) => (
                 <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: '#111', border: '1px solid #1e1e1e', fontSize: 12 }}>
                   <span style={{ color: scoreColor(e.confidence) }}>●</span>
                   &nbsp;{e.canonical}
-                  <span style={{ color: '#444', fontSize: 10, marginLeft: 4 }}>
-                    {matchLabel[e.match] ?? e.match} {Math.round(e.confidence * 100)}%
-                  </span>
+                  <span style={{ color: '#444', fontSize: 10, marginLeft: 4 }}>{matchLabel[e.match] ?? e.match} {Math.round(e.confidence * 100)}%</span>
                 </span>
               ))}
             </div>
