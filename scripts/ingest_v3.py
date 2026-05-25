@@ -137,7 +137,51 @@ def ingest_json(data: dict):
         """, (doc_id, summary, date_sql, year, date_raw))
         print(f"   事件: {date_raw} — {summary[:50]}")
 
-    # 5. clean_graph_edges（同文档内实体两两连接）
+    # 5a. typed relations（从 JSON 的 entities.relations 字段）
+    for ent in entities:
+        name = ent.get("name", "").strip()
+        if not name:
+            continue
+        cur.execute("SELECT id FROM ccc.clean_entities WHERE lower(canonical_name) = lower(%s) LIMIT 1", (name,))
+        src_row = cur.fetchone()
+        if not src_row:
+            continue
+        src_id = src_row[0]
+
+        for rel in ent.get("relations", []):
+            to_name = rel.get("to", "").strip()
+            rel_type = rel.get("type", "co_occurrence")
+            direction = rel.get("direction", "source_to_target")
+            if not to_name:
+                continue
+            cur.execute("SELECT id FROM ccc.clean_entities WHERE lower(canonical_name) = lower(%s) LIMIT 1", (to_name,))
+            tgt_row = cur.fetchone()
+            if not tgt_row:
+                continue
+            tgt_id = tgt_row[0]
+
+            cur.execute("""
+                SELECT id FROM ccc.clean_graph_edges
+                WHERE source_entity_id = %s AND target_entity_id = %s
+                  AND relation_type = %s
+            """, (src_id, tgt_id, rel_type))
+            if cur.fetchone():
+                cur.execute("""
+                    UPDATE ccc.clean_graph_edges
+                    SET weight = weight + 1, document_count = document_count + 1
+                    WHERE source_entity_id = %s AND target_entity_id = %s
+                      AND relation_type = %s
+                """, (src_id, tgt_id, rel_type))
+            else:
+                cur.execute("""
+                    INSERT INTO ccc.clean_graph_edges
+                        (source_entity_id, target_entity_id, relation_type,
+                         relation_label, relation_direction, weight, document_count)
+                    VALUES (%s, %s, 'typed', %s, %s, 1.0, 1)
+                """, (src_id, tgt_id, rel_type, direction))
+            print(f"   关系: {name} --[{rel_type}]--> {to_name}")
+
+    # 5b. co_occurrence（同文档内实体两两连接，作为兜底）
     cur.execute("""
         SELECT entity_id FROM ccc.clean_document_entities
         WHERE document_id = %s
