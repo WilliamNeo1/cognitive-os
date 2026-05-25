@@ -4,8 +4,7 @@
 用法: python3 scripts/sync_to_supabase.py
 """
 
-import psycopg2
-import os
+import psycopg2, os
 from datetime import datetime
 
 LOCAL_DB = {
@@ -25,17 +24,19 @@ SUPABASE_DB = {
 }
 
 TABLES = [
-    "entities",
-    "documents",
-    "document_entities",
-    "graph_edges",
     "person_aliases",
+    "person_noise_library",
+    "clean_entities",
+    "raw_documents",
+    "documents",
+    "clean_document_entities",
+    "clean_graph_edges",
     "events",
+    "claims",
     "cognitive_nodes",
-    "contradictions",
-    "revision_log",
-    "signals",
     "cognitive_edges",
+    "contradictions",
+    "signals",
 ]
 
 def get_max_id(cur, table):
