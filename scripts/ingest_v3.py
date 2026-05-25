@@ -178,6 +178,10 @@ def ingest_json(data: dict):
                         (source_entity_id, target_entity_id, relation_type,
                          relation_label, relation_direction, weight, document_count)
                     VALUES (%s, %s, 'typed', %s, %s, 1.0, 1)
+                    ON CONFLICT (source_entity_id, target_entity_id, relation_type)
+                    DO UPDATE SET
+                        weight = ccc.clean_graph_edges.weight + 0.5,
+                        document_count = ccc.clean_graph_edges.document_count + 1
                 """, (src_id, tgt_id, rel_type, direction))
             print(f"   关系: {name} --[{rel_type}]--> {to_name}")
 

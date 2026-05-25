@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 本地 ccc -> Supabase ccc 同步脚本
-每次 ingest 后自动调用
+用时间戳做增量判断，解决 id 不对齐问题
 """
 
 import psycopg2, os
@@ -23,7 +23,8 @@ SUPABASE_DB = {
     "password": os.environ.get("SUPABASE_DB_PASSWORD", ""),
 }
 
-INCREMENTAL_TABLES = [
+# 有 created_at 的表用时间戳，没有的用全量对比
+TIMESTAMP_TABLES = [
     "person_aliases",
     "clean_entities",
     "raw_documents",
@@ -38,49 +39,70 @@ INCREMENTAL_TABLES = [
     "signals",
 ]
 
-def get_max_id(cur, table):
-    cur.execute(f"SELECT MAX(id) FROM ccc.{table}")
-    return cur.fetchone()[0] or 0
+def get_remote_max_time(cur, table):
+    try:
+        cur.execute(f"SELECT MAX(created_at) FROM ccc.{table}")
+        result = cur.fetchone()[0]
+        return result
+    except Exception:
+        return None
 
-def sync_incremental(local_cur, remote_cur, remote_conn, table):
-    remote_max = get_max_id(remote_cur, table)
-    local_max  = get_max_id(local_cur, table)
+def sync_table(local_cur, remote_cur, remote_conn, table):
+    remote_max_time = get_remote_max_time(remote_cur, table)
 
-    if local_max <= remote_max:
+    if remote_max_time:
+        local_cur.execute(
+            f"SELECT * FROM ccc.{table} WHERE created_at > %s ORDER BY created_at, id",
+            (remote_max_time,)
+        )
+    else:
+        local_cur.execute(
+            f"SELECT * FROM ccc.{table} ORDER BY created_at, id"
+        )
+
+    rows = local_cur.fetchall()
+    if not rows:
         print(f"  {table}: 无新数据")
         return 0
 
-    local_cur.execute(
-        f"SELECT * FROM ccc.{table} WHERE id > %s ORDER BY id",
-        (remote_max,)
-    )
-    rows = local_cur.fetchall()
     cols = [desc[0] for desc in local_cur.description]
-    if not rows:
-        return 0
-
     placeholders = ", ".join(["%s"] * len(cols))
-    col_names    = ", ".join(cols)
-    remote_cur.executemany(
-        f"INSERT INTO ccc.{table} ({col_names}) VALUES ({placeholders}) ON CONFLICT (id) DO NOTHING",
-        rows
-    )
+    col_names = ", ".join(cols)
+
+    inserted = 0
+    skipped  = 0
+    for row in rows:
+        try:
+            remote_cur.execute(f"""
+                INSERT INTO ccc.{table} ({col_names})
+                VALUES ({placeholders})
+                ON CONFLICT (id) DO NOTHING
+            """, row)
+            if remote_cur.rowcount > 0:
+                inserted += 1
+            else:
+                skipped += 1
+        except Exception as e:
+            remote_conn.rollback()
+            print(f"  {table}: 行插入失败 - {e}")
+            continue
+
     remote_conn.commit()
-    print(f"  {table}: 同步 {len(rows)} 条")
-    return len(rows)
+    if inserted > 0:
+        print(f"  {table}: 新增 {inserted} 条" + (f"，跳过 {skipped} 条" if skipped else ""))
+    else:
+        print(f"  {table}: 无新数据")
+    return inserted
 
 def sync_noise_library(local_cur, remote_cur, remote_conn):
     local_cur.execute("SELECT word FROM ccc.person_noise_library")
     local_words = {r[0] for r in local_cur.fetchall()}
-
     remote_cur.execute("SELECT word FROM ccc.person_noise_library")
     remote_words = {r[0] for r in remote_cur.fetchall()}
-
     new_words = local_words - remote_words
     if not new_words:
         print(f"  person_noise_library: 无新数据")
         return 0
-
     remote_cur.executemany(
         "INSERT INTO ccc.person_noise_library (word) VALUES (%s) ON CONFLICT DO NOTHING",
         [(w,) for w in new_words]
@@ -100,10 +122,9 @@ def main():
     remote_cur  = remote_conn.cursor()
 
     total = 0
-
-    for table in INCREMENTAL_TABLES:
+    for table in TIMESTAMP_TABLES:
         try:
-            total += sync_incremental(local_cur, remote_cur, remote_conn, table)
+            total += sync_table(local_cur, remote_cur, remote_conn, table)
         except Exception as e:
             print(f"  {table}: 错误 - {e}")
             remote_conn.rollback()
