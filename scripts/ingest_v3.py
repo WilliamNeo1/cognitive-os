@@ -222,6 +222,11 @@ def ingest_image(image_path: str):
     print(f"✅ GPT-4o 提取 {len(data.get('entities',[]))} 个实体")
     return ingest_json(data)
 
+def auto_sync():
+    import subprocess
+    print("\n🔄 自动同步到 Supabase...")
+    subprocess.run(["python3", "scripts/sync_to_supabase.py"])
+
 def main():
     parser = argparse.ArgumentParser(description="CCC 入库脚本 v3")
     parser.add_argument("--json",  help="JSON 文件路径（方案A）")
@@ -232,12 +237,16 @@ def main():
     if args.json:
         with open(args.json, "r", encoding="utf-8") as f:
             ingest_json(json.load(f))
+        auto_sync()
     elif args.image:
         ingest_image(args.image)
+        auto_sync()
     elif args.stdin:
         ingest_json(json.load(sys.stdin))
+        auto_sync()
     else:
         parser.print_help()
 
 if __name__ == "__main__":
     main()
+

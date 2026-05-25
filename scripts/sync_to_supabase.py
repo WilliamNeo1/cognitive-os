@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-本地 ccc -> Supabase ccc 增量同步脚本
-用法: python3 scripts/sync_to_supabase.py
+本地 ccc -> Supabase ccc 同步脚本
+每次 ingest 后自动调用
 """
 
 import psycopg2, os
@@ -23,9 +23,8 @@ SUPABASE_DB = {
     "password": os.environ.get("SUPABASE_DB_PASSWORD", ""),
 }
 
-TABLES = [
+INCREMENTAL_TABLES = [
     "person_aliases",
-    "person_noise_library",
     "clean_entities",
     "raw_documents",
     "documents",
@@ -41,15 +40,14 @@ TABLES = [
 
 def get_max_id(cur, table):
     cur.execute(f"SELECT MAX(id) FROM ccc.{table}")
-    result = cur.fetchone()[0]
-    return result or 0
+    return cur.fetchone()[0] or 0
 
-def sync_table(local_cur, remote_cur, remote_conn, table):
+def sync_incremental(local_cur, remote_cur, remote_conn, table):
     remote_max = get_max_id(remote_cur, table)
     local_max  = get_max_id(local_cur, table)
 
     if local_max <= remote_max:
-        print(f"  {table}: 无新数据 (remote={remote_max}, local={local_max})")
+        print(f"  {table}: 无新数据")
         return 0
 
     local_cur.execute(
@@ -58,22 +56,38 @@ def sync_table(local_cur, remote_cur, remote_conn, table):
     )
     rows = local_cur.fetchall()
     cols = [desc[0] for desc in local_cur.description]
-
     if not rows:
         return 0
 
     placeholders = ", ".join(["%s"] * len(cols))
     col_names    = ", ".join(cols)
-    sql = f"""
-        INSERT INTO ccc.{table} ({col_names})
-        VALUES ({placeholders})
-        ON CONFLICT (id) DO NOTHING
-    """
-
-    remote_cur.executemany(sql, rows)
+    remote_cur.executemany(
+        f"INSERT INTO ccc.{table} ({col_names}) VALUES ({placeholders}) ON CONFLICT (id) DO NOTHING",
+        rows
+    )
     remote_conn.commit()
-    print(f"  {table}: 同步 {len(rows)} 条 (id {remote_max+1} ~ {local_max})")
+    print(f"  {table}: 同步 {len(rows)} 条")
     return len(rows)
+
+def sync_noise_library(local_cur, remote_cur, remote_conn):
+    local_cur.execute("SELECT word FROM ccc.person_noise_library")
+    local_words = {r[0] for r in local_cur.fetchall()}
+
+    remote_cur.execute("SELECT word FROM ccc.person_noise_library")
+    remote_words = {r[0] for r in remote_cur.fetchall()}
+
+    new_words = local_words - remote_words
+    if not new_words:
+        print(f"  person_noise_library: 无新数据")
+        return 0
+
+    remote_cur.executemany(
+        "INSERT INTO ccc.person_noise_library (word) VALUES (%s) ON CONFLICT DO NOTHING",
+        [(w,) for w in new_words]
+    )
+    remote_conn.commit()
+    print(f"  person_noise_library: 同步 {len(new_words)} 条")
+    return len(new_words)
 
 def main():
     print(f"\n{'='*50}")
@@ -86,21 +100,26 @@ def main():
     remote_cur  = remote_conn.cursor()
 
     total = 0
-    for table in TABLES:
+
+    for table in INCREMENTAL_TABLES:
         try:
-            count = sync_table(local_cur, remote_cur, remote_conn, table)
-            total += count
+            total += sync_incremental(local_cur, remote_cur, remote_conn, table)
         except Exception as e:
             print(f"  {table}: 错误 - {e}")
             remote_conn.rollback()
+
+    try:
+        total += sync_noise_library(local_cur, remote_cur, remote_conn)
+    except Exception as e:
+        print(f"  person_noise_library: 错误 - {e}")
+        remote_conn.rollback()
 
     local_cur.close()
     remote_cur.close()
     local_conn.close()
     remote_conn.close()
 
-    print(f"\n{'='*50}")
-    print(f"同步完成，共推送 {total} 条记录")
+    print(f"\n同步完成，共推送 {total} 条")
     print(f"{'='*50}\n")
 
 if __name__ == "__main__":
