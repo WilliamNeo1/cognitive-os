@@ -32,6 +32,7 @@ TIMESTAMP_TABLES = [
     "clean_document_entities",
     "clean_graph_edges",
     "events",
+    "wenziyu_cases",
     "claims",
     "cognitive_nodes",
     "cognitive_edges",
