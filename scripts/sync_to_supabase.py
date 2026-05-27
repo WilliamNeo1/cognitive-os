@@ -37,6 +37,8 @@ TIMESTAMP_TABLES = [
     "event_chains",
     "event_nodes",
     "causal_edges",
+    "entity_profiles",
+    "entity_trajectories",
     "cognitive_nodes",
     "cognitive_edges",
     "contradictions",
