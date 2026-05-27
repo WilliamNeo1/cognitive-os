@@ -39,6 +39,8 @@ TIMESTAMP_TABLES = [
     "causal_edges",
     "entity_profiles",
     "entity_trajectories",
+    "behavioral_models",
+    "contradiction_engine",
     "cognitive_nodes",
     "cognitive_edges",
     "contradictions",
