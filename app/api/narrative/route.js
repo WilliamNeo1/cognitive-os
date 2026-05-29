@@ -7,7 +7,7 @@ const supabase = createClient(
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
-async function generateNarrative(query, results, resolvedEntities) {
+async function generateNarrative(query, results, resolvedEntities, entityIntel) {
   if (!GROQ_API_KEY) return null;
 
   const entityNames = resolvedEntities
@@ -20,9 +20,15 @@ async function generateNarrative(query, results, resolvedEntities) {
     `[文档${i+1}] ${r.content_preview}`
   ).join("\n\n");
 
-  const prompt = `你是一个情报分析系统。根据以下搜索结果，为查询"${query}"生成简洁的认知叙事分析。
+  let essenceContext = "";
+  if (entityIntel?.profile) {
+    const p = entityIntel.profile;
+    essenceContext = `\n实体本质：${p.essence}\n核心驱动：${p.core_drives?.join("、")}\n当前压力：${entityIntel.trajectory?.pressure}（${entityIntel.trajectory?.pressure_trend}）`;
+  }
 
-核心实体：${entityNames || query}
+  const prompt = `你是一个情报分析系统。根据以下信息，为查询"${query}"生成简洁的认知叙事分析。
+
+核心实体：${entityNames || query}${essenceContext}
 
 相关文档摘要：
 ${topDocs}
@@ -50,13 +56,15 @@ ${topDocs}
           temperature: 0.3,
           max_tokens: 300,
           messages: [
-            { role: "system", content: "你是一个专注于政治和情报分析的认知系统，输出简洁精准的分析。" },
+            {
+              role: "system",
+              content: "你是一个专注于政治和情报分析的认知系统，输出简洁精准的分析。"
+            },
             { role: "user", content: prompt }
           ],
         }),
       }
     );
-
     if (!response.ok) return null;
     const data = await response.json();
     return data.choices?.[0]?.message?.content?.trim() || null;
@@ -65,19 +73,10 @@ ${topDocs}
   }
 }
 
-async function getEntityIntelligence(entityName) {
-  if (!entityName) return null;
-  const { data } = await supabase
-    .schema("ccc")
-    .rpc("entity_intelligence", { p_entity_name: entityName });
-  return data;
-}
-
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q");
-
     if (!q) return Response.json({ ok: false, error: "missing query" });
 
     const { data, error } = await supabase
@@ -86,22 +85,28 @@ export async function GET(req) {
 
     if (error) return Response.json({ ok: false, error });
 
-    const results = data ?? [];
+    const results          = data ?? [];
     const resolvedEntities = results[0]?.resolved_entities ?? [];
+    const topEntity        = resolvedEntities[0]?.canonical;
 
-    // 并行获取叙事和实体情报
-    const topEntity = resolvedEntities[0]?.canonical;
-    const [narrative, entityIntel] = await Promise.all([
-      generateNarrative(q, results, resolvedEntities),
-      getEntityIntelligence(topEntity),
-    ]);
+    let entityIntel = null;
+    if (topEntity) {
+      const { data: intel } = await supabase
+        .schema("ccc")
+        .rpc("entity_intelligence", { p_entity_name: topEntity });
+      entityIntel = intel;
+    }
+
+    const narrative = await generateNarrative(
+      q, results, resolvedEntities, entityIntel
+    );
 
     return Response.json({
       ok: true,
       query: q,
       count: results.length,
-      narrative: narrative || null,
-      entity_intelligence: entityIntel || null,
+      narrative,
+      entity_intelligence: entityIntel,
       results: results.map(r => ({
         document_id:       r.document_id,
         content_preview:   r.content_preview,
