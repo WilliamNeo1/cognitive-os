@@ -23,7 +23,7 @@ async function generateNarrative(query, results, resolvedEntities, entityIntel) 
   let essenceContext = "";
   if (entityIntel?.profile) {
     const p = entityIntel.profile;
-    essenceContext = `\n实体本质：${p.essence}\n核心驱动：${p.core_drives?.join("、")}\n当前压力：${entityIntel.trajectory?.pressure}（${entityIntel.trajectory?.pressure_trend}）`;
+    essenceContext = `\n实体本质：${p.essence}\n核心驱动：${p.core_drives?.join("、")}\n当前压力：${entityIntel.trajectory?.pressure}（${entityIntel.trajectory?.pressure_trend}）\n预判：${entityIntel.trajectory?.short_term_prediction}`;
   }
 
   const prompt = `你是一个情报分析系统。根据以下信息，为查询"${query}"生成简洁的认知叙事分析。
@@ -73,6 +73,30 @@ ${topDocs}
   }
 }
 
+async function fetchEntityIntelligence(entityName) {
+  if (!entityName) return null;
+  try {
+    // 直接用 REST API 调用，绕过 JS 客户端的 jsonb 解析问题
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/entity_intelligence`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": process.env.SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        "Accept-Profile": "ccc",
+        "Content-Profile": "ccc",
+      },
+      body: JSON.stringify({ p_entity_name: entityName }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -89,13 +113,10 @@ export async function GET(req) {
     const resolvedEntities = results[0]?.resolved_entities ?? [];
     const topEntity        = resolvedEntities[0]?.canonical;
 
-    let entityIntel = null;
-    if (topEntity) {
-      const { data: intel } = await supabase
-        .schema("ccc")
-        .rpc("entity_intelligence", { p_entity_name: topEntity });
-      entityIntel = intel;
-    }
+    const [entityIntel, narrativeBase] = await Promise.all([
+      fetchEntityIntelligence(topEntity),
+      Promise.resolve(null),
+    ]);
 
     const narrative = await generateNarrative(
       q, results, resolvedEntities, entityIntel
