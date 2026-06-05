@@ -1,0 +1,22 @@
+{
+  "backup_name": "RSAL P7.3e Final Decision Gate Design Backup",
+  "status": "DESIGN_ONLY_NOT_IMPLEMENTED",
+  "stable_baseline": "P7.3d_forecast_v1_1_confidence_gate_stable",
+  "created_for": "cognitive-os",
+  "files": [
+    "p7_3e_final_decision_gate_design.md",
+    "p7_3e_final_decision_gate_manifest.json",
+    "p7_3e_final_decision_gate_design.sha256",
+    "p7_3e_final_decision_gate_backup.tar.gz"
+  ],
+  "do_not_modify": [
+    "ccc.forecast_v1_1(text)",
+    "ccc.forecast_v1_1_core(text)",
+    "ccc.forecast_confidence_gate_v1(double precision, double precision, double precision)",
+    "ccc.forecast_v1_1_regression",
+    "active contradiction_engine data",
+    "Supabase",
+    "Next.js frontend"
+  ],
+  "recommended_next_function": "ccc.forecast_v1_1_final_gate(text)"
+}
