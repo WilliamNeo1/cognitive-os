@@ -16,11 +16,15 @@ LOCAL_DB = {
 }
 
 SUPABASE_DB = {
-    "host":     "aws-1-ap-southeast-2.pooler.supabase.com",
-    "port":     5432,
-    "dbname":   "postgres",
-    "user":     "postgres.mgigbiblwqywcegkhjpu",
+    "host": "aws-1-ap-southeast-2.pooler.supabase.com",
+    "port": 5432,
+    "dbname": "postgres",
+    "user": "postgres.mgigbiblwqywcegkhjpu",
     "password": os.environ.get("SUPABASE_DB_PASSWORD", ""),
+    "sslmode": "require",
+    "connect_timeout": 30,
+    "keepalives": 1,
+    "keepalives_idle": 30,
 }
 
 # 有 created_at 的表用时间戳，没有的用全量对比
@@ -41,6 +45,7 @@ TIMESTAMP_TABLES = [
     "entity_trajectories",
     "behavioral_models",
     "contradiction_engine",
+    "source_profiles",
     "cognitive_nodes",
     "cognitive_edges",
     "contradictions",
