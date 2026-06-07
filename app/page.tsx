@@ -22,6 +22,7 @@ interface Result {
   sources: string[];
 }
 interface Decision {
+  canonical_entity?: string;
   final_decision: string;
   final_priority: string;
   final_instruction: string;
@@ -66,46 +67,123 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-function DecisionPanel({ decision }: { decision: Decision }) {
-  const color = decisionColor(decision.final_decision);
+function FeedbackPanel({ decision, query }: { decision: Decision; query: string }) {
+  const [selected, setSelected]     = useState<'AGREE' | 'DISAGREE' | null>(null);
+  const [reason, setReason]         = useState('');
+  const [files, setFiles]           = useState<File[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted]   = useState(false);
+  const [error, setError]           = useState('');
+
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFiles(Array.from(e.target.files ?? []).slice(0, 5));
+  };
+
+  const submit = async () => {
+    if (!selected) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const fd = new FormData();
+      fd.append('query_text',        query);
+      fd.append('canonical_entity',  decision.canonical_entity ?? query);
+      fd.append('final_decision',    decision.final_decision);
+      fd.append('final_priority',    decision.final_priority);
+      fd.append('final_instruction', decision.final_instruction ?? '');
+      fd.append('feedback_value',    selected);
+      fd.append('feedback_reason',   reason);
+      fd.append('page_path',         window.location.pathname);
+      files.forEach(f => fd.append('files', f));
+      const res  = await fetch('/api/decision-feedback', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (json.ok) setSubmitted(true);
+      else setError(json.error ?? '提交失败');
+    } catch (e: any) { setError(e.message); }
+    setSubmitting(false);
+  };
+
+  if (submitted) return (
+    <div style={{ marginBottom: 20, padding: '12px 20px', background: '#0a0a0a', border: '1px solid #1a2a1a', fontSize: 12, color: '#00ff9d44' }}>
+      ✓ 反馈已记录
+    </div>
+  );
+
   return (
-    <div style={{ marginBottom: 20, padding: '16px 20px', background: '#0a0a0a', border: `1px solid ${color}22` }}>
-      <div style={{ fontSize: 10, color: '#444', letterSpacing: 2, marginBottom: 12 }}>⬡ P7 决策层</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: 2, color }}>{decision.final_decision}</span>
-          <span style={{ fontSize: 14, color: '#666', fontWeight: 700 }}>{decision.final_priority}</span>
-        </div>
-        <span style={{ color: '#222' }}>|</span>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {decision.action_level && (
-            <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>
-              {decision.action_level}
-            </span>
-          )}
-          {decision.action_mode && (
-            <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>
-              {decision.action_mode}
-            </span>
-          )}
-          {decision.risk_boundary && (
-            <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>
-              {decision.risk_boundary}
-            </span>
-          )}
-        </div>
+    <div style={{ marginBottom: 20, padding: '14px 20px', background: '#0a0a0a', border: '1px solid #1a1a1a' }}>
+      <div style={{ fontSize: 10, color: '#333', letterSpacing: 2, marginBottom: 12 }}>反馈</div>
+      <div style={{ display: 'flex', gap: 10, marginBottom: selected ? 14 : 0 }}>
+        {(['AGREE', 'DISAGREE'] as const).map(v => (
+          <button key={v} onClick={() => setSelected(v === selected ? null : v)}
+            style={{
+              padding: '6px 18px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', letterSpacing: 1,
+              border: selected === v ? '1px solid #00ff9d66' : '1px solid #222',
+              background: selected === v ? '#00ff9d11' : 'transparent',
+              color: selected === v ? '#00ff9d' : '#444',
+            }}>
+            {v === 'AGREE' ? '同意' : '不同意'}
+          </button>
+        ))}
       </div>
-      {decision.final_instruction && (
-        <p style={{ margin: '12px 0 0', fontSize: 13, color: '#888', lineHeight: 1.6, borderLeft: `2px solid ${color}66`, paddingLeft: 12 }}>
-          {decision.final_instruction}
-        </p>
-      )}
-      {decision.pushed_at && (
-        <div style={{ marginTop: 10, fontSize: 10, color: '#333' }}>
-          Q→W {new Date(decision.pushed_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
-        </div>
+      {selected && (
+        <>
+          <textarea value={reason} onChange={e => setReason(e.target.value)}
+            placeholder="原因（选填）" rows={3}
+            style={{ width: '100%', marginTop: 10, background: '#111', border: '1px solid #222', color: '#888', padding: '8px 12px', fontSize: 12, fontFamily: 'inherit', resize: 'vertical', outline: 'none', boxSizing: 'border-box' }} />
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <label style={{ fontSize: 11, color: '#444', cursor: 'pointer', border: '1px solid #222', padding: '4px 12px' }}>
+              附件（选填，最多5个，单文件≤20MB）
+              <input type="file" multiple accept=".jpg,.jpeg,.png,.webp,.txt,.pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={handleFiles} style={{ display: 'none' }} />
+            </label>
+            {files.length > 0 && <span style={{ fontSize: 11, color: '#555' }}>{files.length} 个文件</span>}
+          </div>
+          {error && <div style={{ marginTop: 8, fontSize: 11, color: '#ff4444' }}>{error}</div>}
+          <button onClick={submit} disabled={submitting}
+            style={{ marginTop: 12, padding: '7px 20px', fontSize: 11, fontFamily: 'inherit', cursor: 'pointer', letterSpacing: 1, background: '#00ff9d', color: '#000', border: 'none', fontWeight: 700 }}>
+            {submitting ? '提交中...' : '提交'}
+          </button>
+        </>
       )}
     </div>
+  );
+}
+
+function DecisionPanel({ decision, query }: { decision: Decision; query: string }) {
+  const color = decisionColor(decision.final_decision);
+  return (
+    <>
+      <div style={{ marginBottom: 12, padding: '16px 20px', background: '#0a0a0a', border: `1px solid ${color}22` }}>
+        <div style={{ fontSize: 10, color: '#444', letterSpacing: 2, marginBottom: 12 }}>⬡ P7 决策层</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: 2, color }}>{decision.final_decision}</span>
+            <span style={{ fontSize: 14, color: '#666', fontWeight: 700 }}>{decision.final_priority}</span>
+          </div>
+          <span style={{ color: '#222' }}>|</span>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {decision.action_level && (
+              <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>{decision.action_level}</span>
+            )}
+            {decision.action_mode && (
+              <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>{decision.action_mode}</span>
+            )}
+            {decision.risk_boundary && (
+              <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>{decision.risk_boundary}</span>
+            )}
+          </div>
+        </div>
+        {decision.final_instruction && (
+          <p style={{ margin: '12px 0 0', fontSize: 13, color: '#888', lineHeight: 1.6, borderLeft: `2px solid ${color}66`, paddingLeft: 12 }}>
+            {decision.final_instruction}
+          </p>
+        )}
+        {decision.pushed_at && (
+          <div style={{ marginTop: 10, fontSize: 10, color: '#333' }}>
+            Q→W {new Date(decision.pushed_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
+          </div>
+        )}
+      </div>
+      <div style={{ border: "2px solid red", padding: 8, color: "red" }}>FEEDBACK_TEST</div><FeedbackPanel decision={decision} query={query} />
+    </>
   );
 }
 
@@ -175,19 +253,19 @@ function ResultCard({ r, index }: { r: Result; index: number }) {
 }
 
 export default function Home() {
-  const [user, setUser]           = useState<any>(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [email, setEmail]         = useState('');
-  const [password, setPassword]   = useState('');
-  const [loading, setLoading]     = useState(false);
-  const [message, setMessage]     = useState('');
+  const [user, setUser]             = useState<any>(null);
+  const [authReady, setAuthReady]   = useState(false);
+  const [email, setEmail]           = useState('');
+  const [password, setPassword]     = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [message, setMessage]       = useState('');
   const [isRegister, setIsRegister] = useState(false);
-  const [q, setQ]                 = useState('');
-  const [results, setResults]     = useState<Result[]>([]);
-  const [meta, setMeta]           = useState<{ query: string; count: number; source: string } | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [entities, setEntities]   = useState<ResolvedEntity[]>([]);
-  const [decision, setDecision]   = useState<Decision | null>(null);
+  const [q, setQ]                   = useState('');
+  const [results, setResults]       = useState<Result[]>([]);
+  const [meta, setMeta]             = useState<{ query: string; count: number; source: string } | null>(null);
+  const [searching, setSearching]   = useState(false);
+  const [entities, setEntities]     = useState<ResolvedEntity[]>([]);
+  const [decision, setDecision]     = useState<Decision | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -234,13 +312,9 @@ export default function Home() {
           ? json.resolved_entities.slice(0, 4)
           : (json.results?.[0]?.resolved_entities ?? []).slice(0, 4);
         setEntities(ents);
-        if (json.decision) {
-          setDecision(json.decision);
-        }
+        if (json.decision) setDecision(json.decision);
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
     setSearching(false);
   };
 
@@ -275,6 +349,8 @@ export default function Home() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#080808', color: '#ccc', fontFamily: "'Courier New', monospace" }}>
+      <div style={{ position: "fixed", top: 8, right: 8, zIndex: 9999, background: "red", color: "white", padding: 8 }}>PAGE_TSX_ACTIVE</div>
+      <div style={{ position: "fixed", top: 8, right: 8, zIndex: 9999, background: "red", color: "white", padding: 8 }}>PAGE_TSX_ACTIVE</div>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 32px', borderBottom: '1px solid #181818' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
           <span style={{ fontSize: 18, fontWeight: 700, color: '#00ff9d', letterSpacing: 4 }}>⬡ RSAL</span>
@@ -340,7 +416,7 @@ export default function Home() {
             </div>
           )}
 
-          {decision && <DecisionPanel decision={decision} />}
+          {decision && <DecisionPanel decision={decision} query={meta.query} />}
 
           {results.map((r, i) => <ResultCard key={r.document_id} r={r} index={i} />)}
         </section>
