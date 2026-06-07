@@ -11,8 +11,8 @@ export async function GET(req) {
     const q = searchParams.get("q");
     if (!q) return Response.json({ ok: false, error: "missing query" });
 
-    // 先精确匹配 canonical_entity，再 fallback 模糊匹配 search_text
     const { data, error } = await supabase
+      .schema("ccc")
       .from("w_decision_public_v1")
       .select("*")
       .or(`canonical_entity.eq.${q},q.eq.${q}`)

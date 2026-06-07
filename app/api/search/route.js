@@ -7,6 +7,7 @@ const supabase = createClient(
 
 async function searchW(q) {
   const { data, error } = await supabase
+    .schema("ccc")
     .rpc("search_router_v3", { q });
   if (error) return null;
   return data ?? null;
@@ -36,6 +37,7 @@ function formatWResults(wData) {
 async function getPublishedDecision(canonical) {
   if (!canonical) return null;
   const { data } = await supabase
+    .schema("ccc")
     .from("w_decision_public_v1")
     .select("canonical_entity,final_decision,final_priority,final_instruction,action_mode,action_level,risk_boundary,decision_score,pushed_at")
     .or(`canonical_entity.eq.${canonical},q.eq.${canonical}`)
@@ -64,7 +66,6 @@ export async function GET(req) {
 
     const { results, resolvedEntities } = formatWResults(wData);
 
-    // 取第一个解析实体，查 W 侧已发布的决策
     const topEntity = resolvedEntities[0]?.canonical ?? null;
     const decision  = await getPublishedDecision(topEntity);
 
