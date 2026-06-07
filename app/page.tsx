@@ -21,6 +21,17 @@ interface Result {
   contradictions: Contradiction[];
   sources: string[];
 }
+interface Decision {
+  final_decision: string;
+  final_priority: string;
+  final_instruction: string;
+  action_status?: string;
+  action_level?: string;
+  action_mode?: string;
+  risk_boundary?: string;
+  decision_score?: number;
+  pushed_at?: string;
+}
 
 const matchLabel: Record<string, string> = {
   alias_exact: '精确别名', alias_fuzzy: '模糊别名',
@@ -33,6 +44,14 @@ function scoreColor(v: number) {
   return '#ff6b6b';
 }
 
+function decisionColor(d: string) {
+  if (d === 'DO')              return '#00ff9d';
+  if (d === 'DO_WITH_CAUTION') return '#ffd166';
+  if (d === 'MONITOR_ONLY')    return '#88aaff';
+  if (d === 'WAIT')            return '#888888';
+  return '#ff4444';
+}
+
 function ScoreBar({ label, value }: { label: string; value: number }) {
   const pct = Math.round(value * 100);
   const color = scoreColor(value);
@@ -43,6 +62,49 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
         <div style={{ height: '100%', width: `${pct}%`, background: color }} />
       </div>
       <span style={{ width: 28, fontSize: 10, color, textAlign: 'right' }}>{pct}</span>
+    </div>
+  );
+}
+
+function DecisionPanel({ decision }: { decision: Decision }) {
+  const color = decisionColor(decision.final_decision);
+  return (
+    <div style={{ marginBottom: 20, padding: '16px 20px', background: '#0a0a0a', border: `1px solid ${color}22` }}>
+      <div style={{ fontSize: 10, color: '#444', letterSpacing: 2, marginBottom: 12 }}>⬡ P7 决策层</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: 2, color }}>{decision.final_decision}</span>
+          <span style={{ fontSize: 14, color: '#666', fontWeight: 700 }}>{decision.final_priority}</span>
+        </div>
+        <span style={{ color: '#222' }}>|</span>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {decision.action_level && (
+            <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>
+              {decision.action_level}
+            </span>
+          )}
+          {decision.action_mode && (
+            <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>
+              {decision.action_mode}
+            </span>
+          )}
+          {decision.risk_boundary && (
+            <span style={{ fontSize: 11, padding: '2px 8px', background: '#ffffff08', border: '1px solid #222', color: '#666' }}>
+              {decision.risk_boundary}
+            </span>
+          )}
+        </div>
+      </div>
+      {decision.final_instruction && (
+        <p style={{ margin: '12px 0 0', fontSize: 13, color: '#888', lineHeight: 1.6, borderLeft: `2px solid ${color}66`, paddingLeft: 12 }}>
+          {decision.final_instruction}
+        </p>
+      )}
+      {decision.pushed_at && (
+        <div style={{ marginTop: 10, fontSize: 10, color: '#333' }}>
+          Q→W {new Date(decision.pushed_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
+        </div>
+      )}
     </div>
   );
 }
@@ -113,18 +175,19 @@ function ResultCard({ r, index }: { r: Result; index: number }) {
 }
 
 export default function Home() {
-  const [user, setUser]         = useState<any>(null);
+  const [user, setUser]           = useState<any>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [message, setMessage]   = useState('');
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [message, setMessage]     = useState('');
   const [isRegister, setIsRegister] = useState(false);
-  const [q, setQ]               = useState('');
-  const [results, setResults]   = useState<Result[]>([]);
-  const [meta, setMeta]         = useState<{ query: string; count: number } | null>(null);
+  const [q, setQ]                 = useState('');
+  const [results, setResults]     = useState<Result[]>([]);
+  const [meta, setMeta]           = useState<{ query: string; count: number; source: string } | null>(null);
   const [searching, setSearching] = useState(false);
-  const [entities, setEntities] = useState<ResolvedEntity[]>([]);
+  const [entities, setEntities]   = useState<ResolvedEntity[]>([]);
+  const [decision, setDecision]   = useState<Decision | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -160,15 +223,19 @@ export default function Home() {
     setResults([]);
     setMeta(null);
     setEntities([]);
+    setDecision(null);
     try {
       const res  = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       const json = await res.json();
-      if (json.ok && Array.isArray(json.results)) {
-        setResults(json.results);
-        setMeta({ query: json.query, count: json.count });
-        const first = json.results[0];
-        if (first?.resolved_entities?.length) {
-          setEntities(first.resolved_entities.slice(0, 4));
+      if (json.ok) {
+        setResults(json.results ?? []);
+        setMeta({ query: json.query, count: json.count, source: json.source ?? '' });
+        const ents = json.resolved_entities?.length
+          ? json.resolved_entities.slice(0, 4)
+          : (json.results?.[0]?.resolved_entities ?? []).slice(0, 4);
+        setEntities(ents);
+        if (json.decision) {
+          setDecision(json.decision);
         }
       }
     } catch (err) {
@@ -247,7 +314,17 @@ export default function Home() {
         <section style={{ padding: '24px 32px', maxWidth: 900 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #151515' }}>
             <span style={{ color: '#555', fontSize: 13 }}>"{meta.query}"</span>
-            <span style={{ color: '#333', fontSize: 11, letterSpacing: 2 }}>{meta.count} 条结果</span>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              {meta.source && (
+                <span style={{ fontSize: 10, letterSpacing: 2, padding: '2px 8px',
+                  background: meta.source === 'W' ? '#00ff9d11' : '#ffffff08',
+                  color: meta.source === 'W' ? '#00ff9d' : '#555',
+                  border: '1px solid currentColor' }}>
+                  {meta.source}
+                </span>
+              )}
+              <span style={{ color: '#333', fontSize: 11, letterSpacing: 2 }}>{meta.count} 条结果</span>
+            </div>
           </div>
 
           {entities.length > 0 && (
@@ -262,6 +339,8 @@ export default function Home() {
               ))}
             </div>
           )}
+
+          {decision && <DecisionPanel decision={decision} />}
 
           {results.map((r, i) => <ResultCard key={r.document_id} r={r} index={i} />)}
         </section>
