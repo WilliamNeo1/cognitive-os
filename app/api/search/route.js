@@ -34,13 +34,14 @@ function formatWResults(wData) {
   return { results, resolvedEntities };
 }
 
-async function getPublishedDecision(canonical) {
-  if (!canonical) return null;
+async function getPublishedDecision(canonical, fallbackQ) {
+  const lookup = canonical || fallbackQ;
+  if (!lookup) return null;
   const { data } = await supabase
     .schema("ccc")
     .from("w_decision_public_v1")
     .select("canonical_entity,final_decision,final_priority,final_instruction,action_mode,action_level,risk_boundary,decision_score,pushed_at")
-    .or(`canonical_entity.eq.${canonical},q.eq.${canonical}`)
+    .or(`canonical_entity.eq.${lookup},q.eq.${lookup}`)
     .order("pushed_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -65,13 +66,12 @@ export async function GET(req) {
     }
 
     const { results, resolvedEntities } = formatWResults(wData);
-
     const topEntity = resolvedEntities[0]?.canonical ?? null;
-    const decision  = await getPublishedDecision(topEntity);
+    const decision  = await getPublishedDecision(topEntity, q);
 
     return Response.json({
       ok:                true,
-      mode:              mode,
+      mode,
       source:            "W",
       query:             q,
       count:             results.length,
