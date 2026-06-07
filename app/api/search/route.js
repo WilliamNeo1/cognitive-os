@@ -48,16 +48,37 @@ async function getPublishedDecision(canonical, fallbackQ) {
   return data ?? null;
 }
 
+async function logMiss({ query_text, mode, source, result_count, user_agent }) {
+  try {
+    await supabase
+      .from("w_search_miss_log")
+      .insert({
+        query_text,
+        route:          "/api/search",
+        mode,
+        source,
+        result_count,
+        decision_found: false,
+        reason:         "NO_SEARCH_RESULTS_AND_NO_DECISION",
+        user_agent:     user_agent ?? null,
+      });
+  } catch (e) {
+    console.error("miss log failed:", e);
+  }
+}
+
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const q    = searchParams.get("q");
-    const mode = searchParams.get("mode") ?? "auto";
+    const q          = searchParams.get("q");
+    const mode       = searchParams.get("mode") ?? "auto";
+    const user_agent = req.headers.get("user-agent") ?? null;
 
     if (!q) return Response.json({ ok: false, error: "missing query" });
 
     const wData = await searchW(q);
     if (!wData) {
+      await logMiss({ query_text: q, mode, source: "EMPTY", result_count: 0, user_agent });
       return Response.json({
         ok: true, mode, source: "EMPTY",
         query: q, count: 0, results: [],
@@ -68,6 +89,10 @@ export async function GET(req) {
     const { results, resolvedEntities } = formatWResults(wData);
     const topEntity = resolvedEntities[0]?.canonical ?? null;
     const decision  = await getPublishedDecision(topEntity, q);
+
+    if (results.length === 0 && !decision) {
+      await logMiss({ query_text: q, mode, source: "W", result_count: 0, user_agent });
+    }
 
     return Response.json({
       ok:                true,
