@@ -182,7 +182,7 @@ function DecisionPanel({ decision, query }: { decision: Decision; query: string 
           </div>
         )}
       </div>
-      <div style={{ border: "2px solid red", padding: 8, color: "red" }}>FEEDBACK_TEST</div><FeedbackPanel decision={decision} query={query} />
+      <FeedbackPanel decision={decision} query={query} />
     </>
   );
 }
@@ -349,8 +349,6 @@ export default function Home() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#080808', color: '#ccc', fontFamily: "'Courier New', monospace" }}>
-      <div style={{ position: "fixed", top: 8, right: 8, zIndex: 9999, background: "red", color: "white", padding: 8 }}>PAGE_TSX_ACTIVE</div>
-      <div style={{ position: "fixed", top: 8, right: 8, zIndex: 9999, background: "red", color: "white", padding: 8 }}>PAGE_TSX_ACTIVE</div>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 32px', borderBottom: '1px solid #181818' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
           <span style={{ fontSize: 18, fontWeight: 700, color: '#00ff9d', letterSpacing: 4 }}>⬡ RSAL</span>
