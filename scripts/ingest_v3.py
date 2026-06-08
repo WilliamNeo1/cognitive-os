@@ -173,52 +173,29 @@ def ingest_json(data: dict):
                       AND relation_type = %s
                 """, (src_id, tgt_id, rel_type))
             else:
-                
-                   # typed edge 去重修复版
-cur.execute("""
-    SELECT id, weight, document_count
-    FROM ccc.clean_graph_edges
-    WHERE source_entity_id = %s
-      AND target_entity_id = %s
-      AND relation_type = 'typed'
-      AND relation_label = %s
-""", (src_id, tgt_id, rel_type))
-
-existing = cur.fetchone()
-
-if existing:
-    edge_id, old_weight, old_doc_count = existing
-
-    cur.execute("""
-        UPDATE ccc.clean_graph_edges
-        SET weight = %s,
-            document_count = %s
-        WHERE id = %s
-    """, (
-        old_weight + 1,
-        old_doc_count + 1,
-        edge_id
-    ))
-
-else:
-    cur.execute("""
-        INSERT INTO ccc.clean_graph_edges
-            (
-                source_entity_id,
-                target_entity_id,
-                relation_type,
-                relation_label,
-                relation_direction,
-                weight,
-                document_count
-            )
-        VALUES (%s, %s, 'typed', %s, %s, 1.0, 1)
-    """, (
-        src_id,
-        tgt_id,
-        rel_type,
-        direction
-    ))
+                cur.execute("""
+                    SELECT id, weight, document_count
+                    FROM ccc.clean_graph_edges
+                    WHERE source_entity_id = %s
+                      AND target_entity_id = %s
+                      AND relation_type = 'typed'
+                      AND relation_label = %s
+                """, (src_id, tgt_id, rel_type))
+                existing = cur.fetchone()
+                if existing:
+                    edge_id, old_weight, old_doc_count = existing
+                    cur.execute("""
+                        UPDATE ccc.clean_graph_edges
+                        SET weight = %s, document_count = %s
+                        WHERE id = %s
+                    """, (old_weight + 1, old_doc_count + 1, edge_id))
+                else:
+                    cur.execute("""
+                        INSERT INTO ccc.clean_graph_edges
+                            (source_entity_id, target_entity_id, relation_type,
+                             relation_label, relation_direction, weight, document_count)
+                        VALUES (%s, %s, 'typed', %s, %s, 1.0, 1)
+                    """, (src_id, tgt_id, rel_type, direction))
                         
             print(f"   关系: {name} --[{rel_type}]--> {to_name}")
 
