@@ -9,7 +9,7 @@ from datetime import datetime
 
 LOCAL_DB = {
     "host":     "localhost",
-    "port":     5432,
+    "port": 5432,
     "dbname":   "postgres",
     "user":     "postgres",
     "password": os.environ.get("LOCAL_PG_PASSWORD", ""),
@@ -17,12 +17,13 @@ LOCAL_DB = {
 
 SUPABASE_DB = {
     "host": "aws-1-ap-southeast-2.pooler.supabase.com",
-    "port": 5432,
+    "port": 6543,
     "dbname": "postgres",
     "user": "postgres.mgigbiblwqywcegkhjpu",
     "password": os.environ.get("SUPABASE_DB_PASSWORD", ""),
     "sslmode": "require",
     "connect_timeout": 30,
+    "gssencmode": "disable",
     "keepalives": 1,
     "keepalives_idle": 30,
 }
