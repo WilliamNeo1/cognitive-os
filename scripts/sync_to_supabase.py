@@ -61,6 +61,47 @@ def get_remote_max_time(cur, table):
     except Exception:
         return None
 
+
+def sync_clean_entities(local_cur, remote_cur, remote_conn):
+    """sync clean_entities using entity_uuid as conflict key."""
+    remote_max_time = get_remote_max_time(remote_cur, "clean_entities")
+    if remote_max_time:
+        local_cur.execute(
+            "SELECT * FROM ccc.clean_entities WHERE created_at > %s ORDER BY created_at, id",
+            (remote_max_time,)
+        )
+    else:
+        local_cur.execute("SELECT * FROM ccc.clean_entities ORDER BY created_at, id")
+
+    rows = local_cur.fetchall()
+    if not rows:
+        print("  clean_entities: 无新数据")
+        return 0
+
+    cols = [desc[0] for desc in local_cur.description]
+    col_names = ", ".join(cols)
+    placeholders = ", ".join(["%s"] * len(cols))
+    update_cols = ", ".join([f"{c}=EXCLUDED.{c}" for c in cols if c not in ("id","entity_uuid","created_at")])
+
+    inserted = skipped = 0
+    for row in rows:
+        try:
+            remote_cur.execute(f"""
+                INSERT INTO ccc.clean_entities ({col_names})
+                VALUES ({placeholders})
+                ON CONFLICT (entity_uuid) DO UPDATE SET {update_cols}
+            """, row)
+            if remote_cur.rowcount > 0:
+                inserted += 1
+            else:
+                skipped += 1
+        except Exception as e:
+            remote_conn.rollback()
+            skipped += 1
+    remote_conn.commit()
+    print(f"  clean_entities: 新增 {inserted} 条，跳过 {skipped} 条")
+    return inserted
+
 def sync_table(local_cur, remote_cur, remote_conn, table):
     remote_max_time = get_remote_max_time(remote_cur, table)
 
