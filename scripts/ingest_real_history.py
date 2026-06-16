@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ingest_real_history.py
+ingest_real_history.py — Phase D.5.1 entity_upsert 接入版 (P3)
 从 ccc.raw_documents WHERE source LIKE 'REAL_HISTORY/%'
 → 写入 ccc.documents
 → 提取实体 → ccc.clean_entities + ccc.clean_document_entities
@@ -14,11 +14,31 @@ ingest_real_history.py
     - 实体提取：基于已知实体名单 + 简单规则（不用 NLP，不联网）
     - 已存在的 content_hash 跳过（幂等）
     - dry-run 模式只打印，不写库
+
+============================================================
+变更说明 (D.5.1 — Shared Entity Upsert Layer, P3)
+============================================================
+不再直接 SELECT/INSERT/UPDATE ccc.clean_entities。
+实体写入改为调用 entity_upsert.upsert_entity()：
+  accept / accept_new -> 正常写入 clean_document_entities
+  review_queue        -> 类型冲突（本脚本的 KNOWN_ENTITIES 类型与已有
+                          clean_entities 记录不一致），跳过该实体的
+                          文档关联，仅计入 skipped_ents
+  raw_staging         -> OCR噪音 / 低价值PERSON，跳过
+
+degree_hint = max(0, len(entities) - 1) —— 同 P2，避免单文档内
+"第一次出现的新PERSON"被门禁2误判为低价值（理由见 ingest_v3.py 注释）。
+
+dry-run 路径不变：仍只调用 extract_entities() 打印，不调用
+upsert_entity()，不连DB写操作。
+============================================================
 """
 
 import os, sys, json, hashlib, argparse, re
 import psycopg2
 from psycopg2.extras import execute_values
+
+from entity_upsert import upsert_entity
 
 LOCAL_DB = {
     "host":     "localhost",
@@ -76,6 +96,7 @@ def process_batch(cur, conn, rows, dry_run):
     inserted_docs = 0
     skipped_docs  = 0
     inserted_ents = 0
+    skipped_ents  = 0   # 新增：被 upsert_entity 分流(raw_staging/review_queue)的实体数
 
     for raw_doc_id, source, raw_content in rows:
         try:
@@ -124,33 +145,32 @@ def process_batch(cur, conn, rows, dry_run):
             doc_id = cur.fetchone()[0]
             skipped_docs += 1
 
-        # 实体提取
+        # 实体提取 — 改为 entity_upsert.upsert_entity()
         entities = extract_entities(text)
         for ent in entities:
             name  = ent["name"]
             etype = ent["type"]
 
-            # upsert clean_entities
-            cur.execute("""
-                SELECT id FROM ccc.clean_entities
-                WHERE lower(canonical_name) = lower(%s) AND entity_type = %s
-            """, (name, etype))
-            row = cur.fetchone()
-            if row:
-                entity_id = row[0]
-                cur.execute("""
-                    UPDATE ccc.clean_entities
-                    SET mention_count = mention_count + 1
-                    WHERE id = %s
-                """, (entity_id,))
-            else:
-                cur.execute("""
-                    INSERT INTO ccc.clean_entities
-                        (canonical_name, entity_type, source, confidence, mention_count)
-                    VALUES (%s, %s, 'ingest_real_history', 0.85, 1)
-                    RETURNING id
-                """, (name, etype))
-                entity_id = cur.fetchone()[0]
+            result = upsert_entity(
+                cur,
+                {
+                    "canonical_name": name,
+                    "entity_type": etype,
+                    "mention_count": 1,
+                    "confidence": 0.85,
+                },
+                source="ingest_real_history",
+                # 同 ingest_v3 P2：避免"单文档内首次出现的新PERSON"被门禁2
+                # (低价值PERSON, mention=1且degree=0)误判而无法入图。
+                degree_hint=max(0, len(entities) - 1),
+            )
+
+            if result["action"] not in ("accept", "accept_new"):
+                skipped_ents += 1
+                continue
+
+            entity_id = result["entity_id"]
+            if result["action"] == "accept_new":
                 inserted_ents += 1
 
             # upsert clean_document_entities
@@ -173,7 +193,7 @@ def process_batch(cur, conn, rows, dry_run):
 
         conn.commit()
 
-    return inserted_docs, skipped_docs, inserted_ents
+    return inserted_docs, skipped_docs, inserted_ents, skipped_ents
 
 def main():
     parser = argparse.ArgumentParser()
@@ -213,22 +233,24 @@ def main():
         print(f"只处理：{args.sheet}")
     print()
 
-    total_docs = total_skip = total_ents = 0
+    total_docs = total_skip = total_ents = total_skip_ents = 0
     batch_size = args.batch
 
     for i in range(0, total, batch_size):
         batch = all_rows[i:i+batch_size]
-        d, s, e = process_batch(cur, conn, batch, args.dry_run)
+        d, s, e, se = process_batch(cur, conn, batch, args.dry_run)
         total_docs += d
         total_skip += s
         total_ents += e
+        total_skip_ents += se
         done = min(i + batch_size, total)
-        print(f"  [{done}/{total}] 新增文档={d} 跳过={s} 新增实体={e}")
+        print(f"  [{done}/{total}] 新增文档={d} 跳过={s} 新增实体={e} 分流实体={se}")
 
     print(f"\n完成：")
     print(f"  新增 documents:      {total_docs}")
     print(f"  跳过（已存在）:       {total_skip}")
     print(f"  新增 clean_entities: {total_ents}")
+    print(f"  分流(raw_staging/review_queue): {total_skip_ents}")
 
     cur.close()
     conn.close()

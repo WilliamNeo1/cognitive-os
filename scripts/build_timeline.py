@@ -1,11 +1,41 @@
 #!/usr/bin/env python3
 """
-build_timeline.py v2 — 时序因果链构建
+build_timeline.py v3 — 时序因果链构建 (Phase D.5.1: find_entity_only 接入版 / P4)
 包含: P2.5 temporal fields + trajectory scoring + previous/next linking
+
+============================================================
+变更说明 (D.5.1 — Shared Entity Upsert Layer, P4)
+============================================================
+这是D.5.1最危险的修改点：原 find_or_create_entity() 在找不到实体时会
+INSERT INTO ccc.clean_entities (..., entity_type='PERSON', ...)——
+任何 ENTITY_KEYWORDS 里的key（包括"乌克兰""俄罗斯""日本""中共""中国社会"
+这类明显非PERSON的概念）如果在clean_entities中还不存在，都会被硬造成
+entity_type='PERSON'的脏数据，这正是审计报告里"类型漂移"的主动来源之一。
+
+P4改动：
+  find_or_create_entity() 删除。
+  改为 get_entity_id() -> entity_upsert.find_entity_only()：
+    - 只读查找，不创建
+    - 找不到 -> 记入 entity_review_queue (conflict_kind='unresolved_reference')，
+      返回 None
+    - 找到但类型与 EXPECTED_TYPE 不符 -> 仍返回找到的entity_id（不阻断），
+      同时记入 entity_review_queue (conflict_kind='reference_type_mismatch')
+      留痕（这是D.5确认过的设计：build_timeline是关系/时间线构建层，
+      不是实体裁决层；分流不删除，警告不阻断）
+
+  build() 主循环：entity_id is None 时打印警告并 continue（跳过该实体
+  本轮的 event_chains/event_nodes/causal_edges 构建；ccc.events 本身
+  不受影响，未来该实体被resolve后可重新跑build_timeline补建）。
+
+  EXPECTED_TYPE: 基于 ENTITY_KEYWORDS/PRESSURE_MAP 现有用法整理的类型猜测，
+  仅用于 find_entity_only 的 expected_type 参数（留痕用，不影响是否创建）。
+============================================================
 """
 
 import psycopg2, os
 from datetime import datetime, timezone
+
+from entity_upsert import find_entity_only
 
 LOCAL_DB = {
     "host": "localhost", "port": 5432,
@@ -43,24 +73,31 @@ PRESSURE_MAP = {
     "日本": "social",      "中国社会": "social",
 }
 
+# EXPECTED_TYPE: 仅用于 find_entity_only 的 expected_type 参数（留痕，不影响
+# 是否创建）。基于 ENTITY_KEYWORDS 各 key 的实际语义整理。
+# "中国社会" 是抽象概念，不映射到标准 PERSON/ORG/GPE，传 None——
+# find_entity_only 在找不到时仍会记 unresolved_reference，但不会因
+# "类型不符"额外记 reference_type_mismatch。
+EXPECTED_TYPE = {
+    "习近平": "PERSON", "特朗普": "PERSON", "马云": "PERSON",
+    "薄熙来": "PERSON", "蔡英文": "PERSON", "Pavel Dourov": "PERSON",
+    "哈马斯": "ORG", "ISIS": "ORG", "美联储": "ORG", "中共": "ORG",
+    "乌克兰": "GPE", "俄罗斯": "GPE", "以色列": "GPE", "香港": "GPE", "日本": "GPE",
+    "中国社会": None,
+}
+
 def get_conn():
     return psycopg2.connect(**LOCAL_DB)
 
-def find_or_create_entity(cur, name):
-    cur.execute("""
-        SELECT id FROM ccc.clean_entities
-        WHERE lower(canonical_name) = lower(%s) LIMIT 1
-    """, (name,))
-    row = cur.fetchone()
-    if row:
-        return row[0]
-    cur.execute("""
-        INSERT INTO ccc.clean_entities
-            (canonical_name, entity_type, source, confidence)
-        VALUES (%s, 'PERSON', 'timeline_auto', 0.8)
-        RETURNING id
-    """, (name,))
-    return cur.fetchone()[0]
+def get_entity_id(cur, entity_name):
+    """
+    只读查找，不创建。找不到 -> 记入 entity_review_queue(unresolved_reference)，
+    返回 None。找到但类型与 EXPECTED_TYPE 不符 -> 仍返回 entity_id，
+    同时记入 entity_review_queue(reference_type_mismatch)。
+    """
+    expected = EXPECTED_TYPE.get(entity_name)
+    result = find_entity_only(cur, entity_name, source="build_timeline", expected_type=expected)
+    return result["entity_id"]
 
 def match_entity(summary):
     s = summary.lower()
@@ -126,6 +163,47 @@ def calc_escalation_score(seq, total, essence):
              "灾难事件": 0.1, "权力更迭": -0.1}.get(essence, 0)
     return min(1.0, max(0.0, base + boost))
 
+def check_entities():
+    """
+    P4 预检模式：只跑实体解析（get_entity_id），不碰 events/event_chains/
+    event_nodes/causal_edges。用于在跑真正的(会DELETE重建)build()之前，
+    先看清楚 ENTITY_KEYWORDS 里每个key在 clean_entities 中能不能找到，
+    以及找到的话类型是否符合 EXPECTED_TYPE。
+
+    不会修改任何 chain/node/edge 数据；entity_review_queue 仍会照常写入
+    (find_entity_only 的副作用)，这是有意保留的——预检本身就是为了
+    把"未解析引用"暴露到 review_queue 供后续处理。
+    """
+    conn = get_conn()
+    cur  = conn.cursor()
+
+    print(f"{'entity_name':<16} {'expected_type':<14} {'found_id':<10} {'found_type':<12} {'状态'}")
+    print("-" * 70)
+
+    found_count = 0
+    unresolved = []
+    for entity_name in ENTITY_KEYWORDS:
+        expected = EXPECTED_TYPE.get(entity_name)
+        result = find_entity_only(cur, entity_name, source="build_timeline_check", expected_type=expected)
+        if result["action"] == "found":
+            found_count += 1
+            mismatch = " (类型不符,已记review_queue)" if (expected and result["entity_type"] != expected) else ""
+            print(f"{entity_name:<16} {str(expected):<14} {result['entity_id']:<10} {result['entity_type']:<12} found{mismatch}")
+        else:
+            unresolved.append(entity_name)
+            print(f"{entity_name:<16} {str(expected):<14} {'-':<10} {'-':<12} unresolved -> review_queue")
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    print(f"\n找到: {found_count}/{len(ENTITY_KEYWORDS)}")
+    if unresolved:
+        print(f"未解析(已记入entity_review_queue, conflict_kind=unresolved_reference): {unresolved}")
+        print(f"\n⚠️  注意: 如果真正跑 build()，上面这些实体的事件会被跳过"
+              f"（不建chain/node），但 ccc.events 本身不受影响。")
+
+
 def build():
     conn = get_conn()
     cur  = conn.cursor()
@@ -175,9 +253,17 @@ def build():
 
     total_chains = 0
     total_nodes  = 0
+    skipped_entities = []  # P4: 记录因找不到 clean_entities 而被跳过的实体
 
     for entity_name, evs in entity_events.items():
-        entity_id = find_or_create_entity(cur, entity_name)
+        entity_id = get_entity_id(cur, entity_name)
+        if entity_id is None:
+            print(f"  ⚠️  {entity_name}: 未在 clean_entities 中找到，已记入 "
+                  f"entity_review_queue(unresolved_reference)，跳过本轮 "
+                  f"{len(evs)} 个事件的 chain 构建（events本身不受影响）")
+            skipped_entities.append(entity_name)
+            continue
+
         pressure  = PRESSURE_MAP.get(entity_name, "political")
         direction = infer_direction(evs)
 
@@ -276,7 +362,14 @@ def build():
 
     print(f"\n{'='*50}")
     print(f"完成: {total_chains}条因果链，{total_nodes}个事件节点")
+    if skipped_entities:
+        print(f"跳过(未在clean_entities中找到，已记入review_queue): "
+              f"{len(skipped_entities)} 个实体 -> {skipped_entities}")
     print(f"{'='*50}")
 
 if __name__ == "__main__":
-    build()
+    import sys
+    if "--check-entities" in sys.argv:
+        check_entities()
+    else:
+        build()
