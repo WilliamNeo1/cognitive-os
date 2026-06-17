@@ -149,6 +149,86 @@ def sync_table(local_cur, remote_cur, remote_conn, table):
         print(f"  {table}: 无新数据")
     return inserted
 
+
+def sync_documents(local_cur, remote_cur, remote_conn):
+    """sync documents using content_hash as conflict key."""
+    remote_max_time = get_remote_max_time(remote_cur, "documents")
+    if remote_max_time:
+        local_cur.execute(
+            "SELECT * FROM ccc.documents WHERE created_at > %s ORDER BY created_at, id",
+            (remote_max_time,)
+        )
+    else:
+        local_cur.execute("SELECT * FROM ccc.documents ORDER BY created_at, id")
+    rows = local_cur.fetchall()
+    if not rows:
+        print("  documents: 无新数据")
+        return 0
+    cols = [desc[0] for desc in local_cur.description]
+    col_names = ", ".join(cols)
+    placeholders = ", ".join(["%s"] * len(cols))
+    inserted = skipped = 0
+    for row in rows:
+        try:
+            remote_cur.execute(f"""
+                INSERT INTO ccc.documents ({col_names})
+                VALUES ({placeholders})
+                ON CONFLICT (content_hash) DO NOTHING
+            """, row)
+            if remote_cur.rowcount > 0:
+                inserted += 1
+            else:
+                skipped += 1
+        except Exception as e:
+            remote_conn.rollback()
+            skipped += 1
+    remote_conn.commit()
+    if inserted > 0:
+        print(f"  documents: 新增 {inserted} 条，跳过 {skipped} 条")
+    else:
+        print("  documents: 无新数据")
+    return inserted
+
+
+def sync_person_aliases(local_cur, remote_cur, remote_conn):
+    """sync person_aliases using alias as conflict key."""
+    remote_max_time = get_remote_max_time(remote_cur, "person_aliases")
+    if remote_max_time:
+        local_cur.execute(
+            "SELECT * FROM ccc.person_aliases WHERE created_at > %s ORDER BY created_at, id",
+            (remote_max_time,)
+        )
+    else:
+        local_cur.execute("SELECT * FROM ccc.person_aliases ORDER BY created_at, id")
+    rows = local_cur.fetchall()
+    if not rows:
+        print("  person_aliases: 无新数据")
+        return 0
+    cols = [desc[0] for desc in local_cur.description]
+    col_names = ", ".join(cols)
+    placeholders = ", ".join(["%s"] * len(cols))
+    inserted = skipped = 0
+    for row in rows:
+        try:
+            remote_cur.execute(f"""
+                INSERT INTO ccc.person_aliases ({col_names})
+                VALUES ({placeholders})
+                ON CONFLICT (alias) DO NOTHING
+            """, row)
+            if remote_cur.rowcount > 0:
+                inserted += 1
+            else:
+                skipped += 1
+        except Exception as e:
+            remote_conn.rollback()
+            skipped += 1
+    remote_conn.commit()
+    if inserted > 0:
+        print(f"  person_aliases: 新增 {inserted} 条，跳过 {skipped} 条")
+    else:
+        print("  person_aliases: 无新数据")
+    return inserted
+
 def sync_noise_library(local_cur, remote_cur, remote_conn):
     local_cur.execute("SELECT word FROM ccc.person_noise_library")
     local_words = {r[0] for r in local_cur.fetchall()}
