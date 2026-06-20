@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import json
 import re
+import hashlib
 import unicodedata
 from dataclasses import dataclass, field
 from typing import Optional
@@ -76,6 +77,21 @@ def normalize_name(name: str) -> str:
     name = name.strip()
     name = re.sub(r"\s+", "", name)
     return name
+
+
+def make_canonical_slug(name: str) -> str:
+    # Phase 2.3 follow-up: 原版对非 ASCII 字符(尤其中文)清洗后会变成空
+    # 字符串,全部 fallback 成同一个 "unnamed-entity"，而 canonical_slug
+    # 又有 UNIQUE 约束 —— 第二个全新中文实体就会直接撞约束崩溃。
+    # 这里给每个 slug 都加一个基于原始名字的短哈希后缀，确保：
+    #   1. 非 ASCII 名字不再塌缩成同一个值
+    #   2. 英文近似名（如 "ABC Corp" / "ABC-Corp" / "abc corp"）也降低碰撞概率
+    # 不引入 pypinyin 等新依赖，不需要查库，INSERT 前纯本地计算。
+    base = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    suffix = hashlib.sha1(name.encode("utf-8")).hexdigest()[:8]
+    if base:
+        return f"{base}-{suffix}"
+    return f"u-{suffix}"
 
 
 def looks_like_ocr_noise(name: str, config: GuardrailConfig) -> bool:
@@ -271,14 +287,16 @@ def upsert_entity(
         }
 
     # ---- 全新正常实体 ----
+    canonical_slug = make_canonical_slug(norm)
+
     cur.execute(
         """
         INSERT INTO ccc.clean_entities
-            (canonical_name, entity_type, source, confidence, mention_count)
-        VALUES (%s, %s, %s, %s, %s)
+            (canonical_name, canonical_slug, entity_type, source, confidence, mention_count)
+        VALUES (%s, %s, %s, %s, %s, %s)
         RETURNING id
         """,
-        (norm, etype, source, confidence, mention_count),
+        (norm, canonical_slug, etype, source, confidence, mention_count),
     )
     entity_id = cur.fetchone()[0]
     return {"action": "accept_new", "entity_id": entity_id, "reason": None, "detail": None}

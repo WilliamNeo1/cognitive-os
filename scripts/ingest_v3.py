@@ -33,7 +33,7 @@ ingest_v3.py — 统一入库脚本 (Phase D.5.1: entity_upsert 接入版 / P2)
 import json, os, sys, hashlib, argparse
 import psycopg2
 
-from entity_upsert import upsert_entity
+from entity_upsert import upsert_entity, normalize_name
 
 LOCAL_DB = {
     "host":   "localhost",
@@ -181,8 +181,20 @@ def ingest_json(data: dict):
         src_id = ent["entity_id"]
         raw    = ent["raw"]
 
+        # Phase 2.3: 每个实体只查一次 source_entity_uuid（不放进下面的
+        # relations 循环，避免对同一个 src_id 重复查询）。
+        # 查不到就跳过整个实体的关系构建，不允许写入 NULL endpoint uuid——
+        # 这是 Phase 2.1 "endpoint anchor 不可漂移" 原则在写入路径上的落地。
+        cur.execute("SELECT entity_uuid FROM ccc.clean_entities WHERE id = %s", (src_id,))
+        src_uuid_row = cur.fetchone()
+        if not src_uuid_row:
+            print(f"   [SKIP] 关系源实体缺失 uuid: {name} source_entity_id={src_id}")
+            continue
+        src_uuid = src_uuid_row[0]
+
         for rel in raw.get("relations", []):
-            to_name = rel.get("to", "").strip()
+            to_name_raw = rel.get("to", "").strip()
+            to_name = normalize_name(to_name_raw)
             rel_type = rel.get("type", "co_occurrence")
             direction = rel.get("direction", "source_to_target")
             if not to_name:
@@ -191,12 +203,15 @@ def ingest_json(data: dict):
             # target 查找逻辑保持不变：按 canonical_name 模糊匹配已有实体
             # （不限type；找不到则跳过，不创建——target的创建/门禁判定
             #  应在它自己作为 entities[] 条目被 upsert_entity 处理时发生）
-            cur.execute("SELECT id FROM ccc.clean_entities WHERE lower(canonical_name) = lower(%s) LIMIT 1", (to_name,))
+            cur.execute("SELECT id, entity_uuid FROM ccc.clean_entities WHERE lower(canonical_name) = lower(%s) LIMIT 1", (to_name,))
             tgt_row = cur.fetchone()
             if not tgt_row:
                 print(f"   [SKIP] 关系: {name} --[{rel_type}]--> {to_name} (target未找到，可能在raw_staging/review_queue)")
                 continue
-            tgt_id = tgt_row[0]
+            tgt_id, tgt_uuid = tgt_row
+            if not tgt_uuid:
+                print(f"   [SKIP] 关系目标实体缺失 uuid: {to_name} target_entity_id={tgt_id}")
+                continue
 
             cur.execute("""
                 SELECT id FROM ccc.clean_graph_edges
@@ -230,10 +245,10 @@ def ingest_json(data: dict):
                 else:
                     cur.execute("""
                         INSERT INTO ccc.clean_graph_edges
-                            (source_entity_id, target_entity_id, relation_type,
-                             relation_label, relation_direction, weight, document_count)
-                        VALUES (%s, %s, 'typed', %s, %s, 1.0, 1)
-                    """, (src_id, tgt_id, rel_type, direction))
+                            (source_entity_id, target_entity_id, source_entity_uuid, target_entity_uuid,
+                             relation_type, relation_label, relation_direction, weight, document_count)
+                        VALUES (%s, %s, %s, %s, 'typed', %s, %s, 1.0, 1)
+                    """, (src_id, tgt_id, src_uuid, tgt_uuid, rel_type, direction))
 
             print(f"   关系: {name} --[{rel_type}]--> {to_name}")
 
@@ -244,6 +259,16 @@ def ingest_json(data: dict):
         WHERE document_id = %s
     """, (doc_id,))
     ent_ids = [r[0] for r in cur.fetchall()]
+
+    # Phase 2.3: 批量取一次 id -> entity_uuid 映射，避免在下面 N^2 配对
+    # 循环里对每一对都单独查询
+    entity_uuid_map = {}
+    if ent_ids:
+        cur.execute("""
+            SELECT id, entity_uuid FROM ccc.clean_entities
+            WHERE id = ANY(%s)
+        """, (ent_ids,))
+        entity_uuid_map = {row[0]: row[1] for row in cur.fetchall()}
 
     for i, eid1 in enumerate(ent_ids):
         for eid2 in ent_ids[i+1:]:
@@ -261,11 +286,17 @@ def ingest_json(data: dict):
                       AND relation_type = 'co_occurrence'
                 """, (src, tgt))
             else:
+                src_uuid = entity_uuid_map.get(src)
+                tgt_uuid = entity_uuid_map.get(tgt)
+                if not src_uuid or not tgt_uuid:
+                    print(f"   [SKIP] co_occurrence endpoint uuid missing: {src}->{tgt}")
+                    continue
                 cur.execute("""
                     INSERT INTO ccc.clean_graph_edges
-                        (source_entity_id, target_entity_id, relation_type, weight, document_count)
-                    VALUES (%s, %s, 'co_occurrence', 1.0, 1)
-                """, (src, tgt))
+                        (source_entity_id, target_entity_id, source_entity_uuid, target_entity_uuid,
+                         relation_type, weight, document_count)
+                    VALUES (%s, %s, %s, %s, 'co_occurrence', 1.0, 1)
+                """, (src, tgt, src_uuid, tgt_uuid))
 
     conn.commit()
     cur.close()
