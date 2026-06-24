@@ -1,0 +1,297 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 760 3480" role="img">
+<title>CCC / Cognitive-OS V6 — Final Architecture</title>
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="760" height="3480" fill="#fbfaf7"/>
+<text x="380" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#20201f" font-family="Arial,Helvetica,sans-serif">CCC / Cognitive-OS V6</text>
+<text x="380" y="55" text-anchor="middle" font-size="11" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Cognitive Architecture · checkpoint-118 · ADR-116 + ADR-117 + Amendment 01 Accepted</text>
+<text x="380" y="72" text-anchor="middle" font-size="10" font-style="italic" fill="#66625c" font-family="Arial,Helvetica,sans-serif">V6 upgrades CCC from an information system into a driver-recognition system.</text>
+<line x1="40" y1="82" x2="720" y2="82" stroke="#c9c2b8" stroke-width="0.5" stroke-dasharray="5 4"/>
+<rect x="40" y="92" width="680" height="752" rx="10" fill="#1a1a1a"/>
+<text x="380" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" letter-spacing="5">CORE</text>
+<text x="380" y="138" text-anchor="middle" font-size="10" fill="#999999" font-family="Arial,Helvetica,sans-serif">CORE is not a layer. It governs all layers.</text>
+<line x1="62" y1="148" x2="698" y2="148" stroke="#3a3a3a" stroke-width="0.6"/>
+<text x="62" y="167" font-size="10.5" font-weight="700" fill="#7ed9b4" font-family="Arial,Helvetica,sans-serif">MISSION</text>
+<text x="62" y="184" font-size="10.5" fill="#dddddd" font-family="Arial,Helvetica,sans-serif">CCC exists to improve judgment, prediction, and action — not to accumulate data.</text>
+<text x="62" y="199" font-size="9.5" fill="#888888" font-family="Arial,Helvetica,sans-serif">User = source  ·  Think tank = externalised structure  ·  CCC = technical carrier</text>
+<line x1="62" y1="211" x2="698" y2="211" stroke="#2e2e2e" stroke-width="0.6"/>
+<rect x="62" y="218" width="656" height="94" rx="7" fill="#071d33" stroke="#2e6da4" stroke-width="1"/>
+<text x="380" y="237" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif" letter-spacing="1">PRIMARY DRIVER CHAIN   ·   D0 → D5</text>
+<text x="380" y="252" text-anchor="middle" font-size="9.5" fill="#6699bb" font-family="Arial,Helvetica,sans-serif">Power → Resources → Economy → Technology → Society → Events</text>
+<rect x="72"  y="262" width="72" height="22" rx="11" fill="#122a44"/><text x="108" y="273" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif">D0 Power</text>
+<line x1="144" y1="273" x2="156" y2="273" stroke="#7ec8f5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="156" y="262" width="82" height="22" rx="11" fill="#122a44"/><text x="197" y="273" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif">D1 Resources</text>
+<line x1="238" y1="273" x2="250" y2="273" stroke="#7ec8f5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="250" y="262" width="80" height="22" rx="11" fill="#122a44"/><text x="290" y="273" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif">D2 Economy</text>
+<line x1="330" y1="273" x2="342" y2="273" stroke="#7ec8f5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="342" y="262" width="88" height="22" rx="11" fill="#122a44"/><text x="386" y="273" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif">D3 Technology</text>
+<line x1="430" y1="273" x2="442" y2="273" stroke="#7ec8f5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="442" y="262" width="76" height="22" rx="11" fill="#122a44"/><text x="480" y="273" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif">D4 Society</text>
+<line x1="518" y1="273" x2="530" y2="273" stroke="#7ec8f5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="530" y="262" width="74" height="22" rx="11" fill="#122a44"/><text x="567" y="273" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif">D5 Events</text>
+<text x="380" y="301" text-anchor="middle" font-size="9" font-style="italic" fill="#556688" font-family="Arial,Helvetica,sans-serif">Event is not the cause. Event is the manifestation. Driver is the cause. Trace causality upward ≥ 3 layers.</text>
+<line x1="62" y1="320" x2="698" y2="320" stroke="#2e2e2e" stroke-width="0.6"/>
+<text x="62" y="338" font-size="10.5" font-weight="700" fill="#a8e6c0" font-family="Arial,Helvetica,sans-serif">CORE PRINCIPLES</text>
+<text x="62" y="356" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">1.  CORE governs all layers, but is not itself a layer.</text>
+<text x="62" y="372" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">2.  Power is the upstream of resource allocation.</text>
+<text x="62" y="388" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">3.  Events are manifestations, not root causes.</text>
+<text x="62" y="404" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">4.  Major analysis must trace upward to power &amp; resource allocation.</text>
+<rect x="62" y="412" width="308" height="118" rx="6" fill="#071e30" stroke="#4aa8e8" stroke-width="1.2"/>
+<rect x="62" y="412" width="308" height="20" rx="6" fill="#0e3354"/>
+<text x="216" y="422" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif" letter-spacing="0.5">ACTION BOUNDARY GROUP  ·  ADR-117 Amendment 01</text>
+<text x="72" y="448" font-size="9.5" fill="#aad8ff" font-family="Arial,Helvetica,sans-serif">5.  Incomplete info → tolerable error, not false certainty.</text>
+<text x="72" y="464" font-size="9.5" fill="#aad8ff" font-family="Arial,Helvetica,sans-serif">6.  Decisions = CORE-aligned choices under constraints,</text>
+<text x="80" y="478" font-size="9.5" fill="#aad8ff" font-family="Arial,Helvetica,sans-serif">    not guaranteed truth.</text>
+<text x="72" y="494" font-size="9.5" fill="#aad8ff" font-family="Arial,Helvetica,sans-serif">7.  Unknown risk must be survivable before action.</text>
+<text x="72" y="510" font-size="9.5" fill="#aad8ff" font-family="Arial,Helvetica,sans-serif">8.  High-leverage nodes, no single-point dependency.</text>
+<text x="62" y="546" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">9.   Source ≠ truth.     10. Record ≠ reality.</text>
+<text x="62" y="561" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">11. Claim ≠ event.      12. Hypothesis ≠ edge.</text>
+<text x="62" y="576" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">13. W feedback ≠ Q fact.</text>
+<text x="62" y="591" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">14. CCC outputs decisions, not just records.</text>
+<line x1="392" y1="328" x2="392" y2="672" stroke="#2e2e2e" stroke-width="0.6"/>
+<text x="406" y="338" font-size="10.5" font-weight="700" fill="#f5a0a0" font-family="Arial,Helvetica,sans-serif">FORBIDDEN RULES</text>
+<text x="406" y="356" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">1.   Do not call CORE a layer or number it Layer 0.</text>
+<text x="406" y="372" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">2.   W → Q automatic write-back permanently forbidden.</text>
+<text x="406" y="388" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">3.   Source must not automatically become truth.</text>
+<text x="406" y="404" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">4.   Claim must not automatically upgrade to event.</text>
+<text x="406" y="420" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">5.   Hypothesis must not auto-write into graph edge.</text>
+<text x="406" y="436" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">6.   Do not open unaudited graph write paths.</text>
+<text x="406" y="452" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">7.   Do not replicate Q core judgment on W side.</text>
+<text x="406" y="468" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">8.   Do not modify locked core functions without checkpoint.</text>
+<text x="406" y="484" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">9.   Do not stop analysis at event layer. Trace higher.</text>
+<text x="406" y="500" font-size="9.5" fill="#bbbbbb" font-family="Arial,Helvetica,sans-serif">10. Do not use complex structures to replace clear boundaries.</text>
+<rect x="406" y="508" width="290" height="82" rx="5" fill="#1e0808" stroke="#c04040" stroke-width="1"/>
+<rect x="406" y="508" width="290" height="18" rx="5" fill="#3a0808"/>
+<text x="551" y="517" text-anchor="middle" dominant-baseline="central" font-size="8.5" font-weight="700" fill="#f5a0a0" font-family="Arial,Helvetica,sans-serif" letter-spacing="0.5">ADDED  ·  ADR-117 Amendment 01  ·  Accepted</text>
+<text x="414" y="540" font-size="9.5" fill="#ffbbbb" font-family="Arial,Helvetica,sans-serif">11. No guaranteed-truth framing of CCC decisions.</text>
+<text x="414" y="556" font-size="9.5" fill="#ffbbbb" font-family="Arial,Helvetica,sans-serif">12. No action when unknown risk exceeds survivable boundary.</text>
+<text x="414" y="572" font-size="9.5" fill="#ffbbbb" font-family="Arial,Helvetica,sans-serif">13. No single-point dependency in any goal or decision path.</text>
+<line x1="62" y1="604" x2="698" y2="604" stroke="#2e2e2e" stroke-width="0.6"/>
+<text x="62" y="621" font-size="10" font-weight="700" fill="#f0d080" font-family="Arial,Helvetica,sans-serif">NAMING FIREWALL  ·  ADR-117</text>
+<text x="62" y="638" font-size="9.5" fill="#cccccc" font-family="Arial,Helvetica,sans-serif">CORE = supreme constraint</text>
+<text x="62" y="653" font-size="9.5" fill="#cccccc" font-family="Arial,Helvetica,sans-serif">L0–L7 = data workflow  ·  design intent, not DDL*</text>
+<text x="62" y="668" font-size="9.5" fill="#cccccc" font-family="Arial,Helvetica,sans-serif">R0–R7 = reasoning  ·  D0–D5 = driver rank  ·  A0–A4 = action priority</text>
+<line x1="392" y1="604" x2="392" y2="752" stroke="#2e2e2e" stroke-width="0.6"/>
+<text x="406" y="621" font-size="10" font-weight="700" fill="#d0b0f5" font-family="Arial,Helvetica,sans-serif">LANGUAGE POLICY v0.1  ·  ADR-117</text>
+<text x="406" y="638" font-size="9.5" fill="#cccccc" font-family="Arial,Helvetica,sans-serif">English for structure (DDL, enums, ADR titles, checkpoints, SVG)</text>
+<text x="406" y="653" font-size="9.5" fill="#cccccc" font-family="Arial,Helvetica,sans-serif">Chinese for explanation  ·  Bilingual for public transmission</text>
+<text x="406" y="668" font-size="9.5" fill="#888888" font-family="Arial,Helvetica,sans-serif">No uncontrolled mixed naming. Every Chinese term binds to English.</text>
+<line x1="62" y1="680" x2="698" y2="680" stroke="#2e2e2e" stroke-width="0.6"/>
+<rect x="62" y="686" width="656" height="32" rx="4" fill="#0d0d0d"/>
+<text x="72" y="697" font-size="9" font-weight="700" fill="#f0d080" font-family="Arial,Helvetica,sans-serif">checkpoint-118</text>
+<text x="168" y="697" font-size="9" fill="#555555" font-family="Arial,Helvetica,sans-serif">·</text>
+<text x="178" y="697" font-size="9" fill="#aaaaaa" font-family="Arial,Helvetica,sans-serif">ADR-116 Accepted</text>
+<text x="292" y="697" font-size="9" fill="#555555" font-family="Arial,Helvetica,sans-serif">·</text>
+<text x="302" y="697" font-size="9" fill="#aaaaaa" font-family="Arial,Helvetica,sans-serif">ADR-117 Accepted</text>
+<text x="416" y="697" font-size="9" fill="#555555" font-family="Arial,Helvetica,sans-serif">·</text>
+<text x="426" y="697" font-size="9" font-weight="600" fill="#7ec8f5" font-family="Arial,Helvetica,sans-serif">ADR-117 Amendment 01 Accepted</text>
+<text x="72" y="710" font-size="8.5" fill="#555555" font-family="Arial,Helvetica,sans-serif">* L0–L7: accepted architecture / design intent · not implemented DDL · future checkpoints required per L-stage · Old P-prefix = historical, not backfilled</text>
+<line x1="62" y1="724" x2="698" y2="724" stroke="#3a3a3a" stroke-width="0.6"/>
+<text x="380" y="738" text-anchor="middle" font-size="9" fill="#444444" font-family="Arial,Helvetica,sans-serif">Everything below is governed by CORE. Schema, Edge, Sync, Feedback — all serve CORE.</text>
+<text x="380" y="752" text-anchor="middle" font-size="9" fill="#444444" font-family="Arial,Helvetica,sans-serif">CCC is not an oracle. CCC is a constrained judgment system under incomplete information.</text>
+<line x1="380" y1="844" x2="380" y2="870" stroke="#66625c" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="40" y="872" width="680" height="116" rx="10" fill="#f6fcf9" stroke="#1D9E75" stroke-width="1.2"/>
+<text x="64" y="898" font-size="14" font-weight="700" fill="#1D9E75" font-family="Arial,Helvetica,sans-serif">①  Reality Ingestion</text>
+<rect x="162" y="886" width="144" height="60" rx="8" fill="#e1f5ee" stroke="#1D9E75" stroke-width="0.8"/>
+<circle cx="188" cy="906" r="8" fill="none" stroke="#0f6e56" stroke-width="1.2"/>
+<ellipse cx="188" cy="906" rx="4" ry="8" fill="none" stroke="#0f6e56" stroke-width="1"/>
+<line x1="180" y1="906" x2="196" y2="906" stroke="#0f6e56" stroke-width="1"/>
+<text x="234" y="904" text-anchor="middle" font-size="12" font-weight="600" fill="#085041" font-family="Arial,Helvetica,sans-serif">Reality</text>
+<text x="234" y="920" text-anchor="middle" font-size="9.5" fill="#0f6e56" font-family="Arial,Helvetica,sans-serif">Public data · OCR · import</text>
+<line x1="306" y1="916" x2="326" y2="916" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="326" y="886" width="156" height="60" rx="8" fill="#e1f5ee" stroke="#1D9E75" stroke-width="0.8"/>
+<rect x="350" y="896" width="11" height="14" rx="2" fill="none" stroke="#0f6e56" stroke-width="1.2"/>
+<line x1="352" y1="901" x2="359" y2="901" stroke="#0f6e56" stroke-width="0.8"/>
+<line x1="352" y1="905" x2="359" y2="905" stroke="#0f6e56" stroke-width="0.8"/>
+<text x="412" y="904" text-anchor="middle" font-size="12" font-weight="600" fill="#085041" font-family="Arial,Helvetica,sans-serif">OCR / Ingest</text>
+<text x="412" y="920" text-anchor="middle" font-size="9.5" fill="#0f6e56" font-family="Arial,Helvetica,sans-serif">ingest_v3.py · NER pipeline</text>
+<line x1="482" y1="916" x2="502" y2="916" stroke="#1D9E75" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="502" y="886" width="176" height="60" rx="8" fill="#e1f5ee" stroke="#1D9E75" stroke-width="0.8"/>
+<circle cx="524" cy="904" r="7" fill="none" stroke="#0f6e56" stroke-width="1.2"/>
+<line x1="529" y1="909" x2="534" y2="914" stroke="#0f6e56" stroke-width="1.5" stroke-linecap="round"/>
+<text x="604" y="904" text-anchor="middle" font-size="12" font-weight="600" fill="#085041" font-family="Arial,Helvetica,sans-serif">Evidence</text>
+<text x="604" y="920" text-anchor="middle" font-size="9.5" fill="#0f6e56" font-family="Arial,Helvetica,sans-serif">News · filings · observations</text>
+<line x1="380" y1="988" x2="380" y2="1012" stroke="#1D9E75" stroke-width="1.3" marker-end="url(#arr)"/>
+<rect x="40" y="1014" width="680" height="656" rx="10" fill="#eaf1ff" stroke="#185fa5" stroke-width="1.2"/>
+<text x="60" y="1046" font-size="13" font-weight="700" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">②</text>
+<text x="60" y="1064" font-size="12" font-weight="700" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">Q Pool</text>
+<text x="60" y="1082" font-size="10" fill="#4a7abf" font-family="Arial,Helvetica,sans-serif">Internal Truth</text>
+<text x="60" y="1097" font-size="10" fill="#4a7abf" font-family="Arial,Helvetica,sans-serif">&amp; Decision Layer</text>
+<text x="60" y="1116" font-size="9" fill="#4a7abf" font-family="Arial,Helvetica,sans-serif">R0–R7</text>
+<rect x="152" y="1028" width="554" height="20" rx="3" fill="#12233a"/>
+<text x="429" y="1038" text-anchor="middle" dominant-baseline="central" font-size="8" fill="#6699cc" font-family="Arial,Helvetica,sans-serif">L0–L7 Operational Workflow · design intent · not implemented DDL · L0 Raw → L1 Doc → L2 Claim → L3 Event → L4 Entity → L5 Candidate → L6 Graph Gate → L7 Decision</text>
+<rect x="248" y="1060" width="264" height="46" rx="8" fill="#ddeeff" stroke="#185fa5" stroke-width="0.8"/>
+<circle cx="272" cy="1074" r="5" fill="none" stroke="#185fa5" stroke-width="1.2"/>
+<path d="M264 1088 Q272 1082 280 1088" fill="none" stroke="#185fa5" stroke-width="1.2"/>
+<text x="380" y="1074" text-anchor="middle" font-size="13" font-weight="600" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">Entity</text>
+<text x="380" y="1090" text-anchor="middle" font-size="9.5" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">entity_uuid · canonical_slug · R0 Clean Ontology</text>
+<line x1="380" y1="1106" x2="380" y2="1124" stroke="#185fa5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="248" y="1124" width="264" height="46" rx="8" fill="#ddeeff" stroke="#185fa5" stroke-width="0.8"/>
+<path d="M270 1145 l5-5 a5.5 5.5 0 0 1 7.8 7.8 l-5 5" fill="none" stroke="#185fa5" stroke-width="1.3" stroke-linecap="round"/>
+<path d="M279 1151 l-5 5 a5.5 5.5 0 0 1-7.8-7.8 l5-5" fill="none" stroke="#185fa5" stroke-width="1.3" stroke-linecap="round"/>
+<text x="380" y="1141" text-anchor="middle" font-size="13" font-weight="600" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">Edge Identity</text>
+<text x="380" y="1157" text-anchor="middle" font-size="9.5" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">edge_uuid · source/target_entity_uuid · R1 Typed Graph</text>
+<line x1="380" y1="1170" x2="380" y2="1188" stroke="#185fa5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="154" y="1188" width="154" height="54" rx="8" fill="#ddeeff" stroke="#185fa5" stroke-width="0.8"/>
+<text x="231" y="1208" text-anchor="middle" font-size="12" font-weight="600" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">Graph</text>
+<text x="231" y="1224" text-anchor="middle" font-size="9.5" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">clean_graph_edges</text>
+<rect x="320" y="1188" width="154" height="54" rx="8" fill="#ddeeff" stroke="#185fa5" stroke-width="0.8"/>
+<circle cx="341" cy="1208" r="7" fill="none" stroke="#185fa5" stroke-width="1.1"/>
+<line x1="341" y1="1202" x2="341" y2="1208" stroke="#185fa5" stroke-width="1.2" stroke-linecap="round"/>
+<line x1="341" y1="1208" x2="345" y2="1211" stroke="#185fa5" stroke-width="1.2" stroke-linecap="round"/>
+<text x="400" y="1208" text-anchor="middle" font-size="12" font-weight="600" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">Timeline</text>
+<text x="400" y="1224" text-anchor="middle" font-size="9.5" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">R2 · event_chains · nodes</text>
+<rect x="486" y="1188" width="162" height="54" rx="8" fill="#ddeeff" stroke="#185fa5" stroke-width="0.8"/>
+<path d="M504 1199 h13 a3 3 0 0 1 3 3 v8 a3 3 0 0 1-3 3 h-7 l-4 4 v-4 h-2 a3 3 0 0 1-3-3 v-8 a3 3 0 0 1 3-3z" fill="none" stroke="#185fa5" stroke-width="1.1"/>
+<text x="565" y="1208" text-anchor="middle" font-size="12" font-weight="600" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">Claims</text>
+<text x="565" y="1224" text-anchor="middle" font-size="9.5" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">claimant · status · source</text>
+<line x1="231" y1="1242" x2="231" y2="1260" stroke="#185fa5" stroke-width="0.8"/>
+<line x1="400" y1="1242" x2="400" y2="1260" stroke="#185fa5" stroke-width="0.8"/>
+<line x1="565" y1="1242" x2="565" y2="1260" stroke="#185fa5" stroke-width="0.8"/>
+<line x1="231" y1="1260" x2="565" y2="1260" stroke="#185fa5" stroke-width="0.8"/>
+<line x1="400" y1="1260" x2="400" y2="1278" stroke="#185fa5" stroke-width="1.1" marker-end="url(#arr)"/>
+<text x="400" y="1295" text-anchor="middle" font-size="10" font-weight="600" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">R3 Essence  ·  R4 Contradiction  ·  R5 Trust Topology  —  P1–P7 Assessment Pipeline</text>
+<rect x="140" y="1303" width="64" height="26" rx="4" fill="#ddeeff" stroke="#185fa5" stroke-width="0.7"/><text x="172" y="1316" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">P1</text>
+<rect x="210" y="1303" width="64" height="26" rx="4" fill="#ddeeff" stroke="#185fa5" stroke-width="0.7"/><text x="242" y="1316" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">P2</text>
+<rect x="280" y="1303" width="64" height="26" rx="4" fill="#ddeeff" stroke="#185fa5" stroke-width="0.7"/><text x="312" y="1316" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">P3</text>
+<rect x="350" y="1303" width="64" height="26" rx="4" fill="#ddeeff" stroke="#185fa5" stroke-width="0.7"/><text x="382" y="1316" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">P4</text>
+<rect x="420" y="1303" width="64" height="26" rx="4" fill="#ddeeff" stroke="#185fa5" stroke-width="0.7"/><text x="452" y="1316" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">P5</text>
+<rect x="490" y="1303" width="64" height="26" rx="4" fill="#ddeeff" stroke="#185fa5" stroke-width="0.7"/><text x="522" y="1316" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">P6 / R6</text>
+<rect x="560" y="1303" width="90" height="26" rx="4" fill="#ddeeff" stroke="#185fa5" stroke-width="0.7"/><text x="605" y="1316" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">P7 / R7 / A0–A4</text>
+<line x1="400" y1="1329" x2="400" y2="1347" stroke="#185fa5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="260" y="1347" width="280" height="46" rx="8" fill="#ddeeff" stroke="#185fa5" stroke-width="0.8"/>
+<text x="400" y="1365" text-anchor="middle" font-size="13" font-weight="600" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">Assessment  (R6 Prediction)</text>
+<text x="400" y="1381" text-anchor="middle" font-size="9.5" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">confidence 0.15–0.95 · unverified ok · Card 1–4 output</text>
+<line x1="400" y1="1393" x2="400" y2="1411" stroke="#185fa5" stroke-width="1.1" marker-end="url(#arr)"/>
+<rect x="260" y="1411" width="280" height="46" rx="8" fill="#ddeeff" stroke="#185fa5" stroke-width="0.8"/>
+<text x="400" y="1429" text-anchor="middle" font-size="13" font-weight="600" fill="#0c447c" font-family="Arial,Helvetica,sans-serif">Decision  (R7)  —  A0–A4</text>
+<text x="400" y="1445" text-anchor="middle" font-size="9.5" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">DO · DO_WITH_CAUTION · WAIT · NO_GO · Truth first · never pre-filtered</text>
+<text x="400" y="1488" text-anchor="middle" font-size="10" fill="#185fa5" font-family="Arial,Helvetica,sans-serif">Q → W  Publication Gate  (one-way)</text>
+<line x1="400" y1="1496" x2="400" y2="1524" stroke="#185fa5" stroke-width="1.5" marker-end="url(#arr)"/>
+<rect x="40" y="1526" width="680" height="250" rx="10" fill="#f0eaff" stroke="#6846a8" stroke-width="1.2"/>
+<text x="60" y="1558" font-size="13" font-weight="700" fill="#6846a8" font-family="Arial,Helvetica,sans-serif">③</text>
+<text x="60" y="1576" font-size="13" font-weight="700" fill="#6846a8" font-family="Arial,Helvetica,sans-serif">W Layer</text>
+<text x="60" y="1596" font-size="10" fill="#6846a8" font-family="Arial,Helvetica,sans-serif">Public Commun.</text>
+<text x="60" y="1611" font-size="10" fill="#6846a8" font-family="Arial,Helvetica,sans-serif">&amp; Protection Layer</text>
+<text x="60" y="1630" font-size="9" fill="#8b68c8" font-family="Arial,Helvetica,sans-serif">ADR-116 Accepted</text>
+<rect x="158" y="1544" width="162" height="72" rx="8" fill="#e4d8f8" stroke="#6846a8" stroke-width="0.8"/>
+<path d="M177 1572 l5-3.5 h7 v11 h-7 l-5-3.5z" fill="none" stroke="#6846a8" stroke-width="1.1"/>
+<path d="M189 1568 q3.5-2.5 3.5-5" fill="none" stroke="#6846a8" stroke-width="1" stroke-linecap="round"/>
+<path d="M189 1583 q3.5 2.5 3.5 5" fill="none" stroke="#6846a8" stroke-width="1" stroke-linecap="round"/>
+<text x="238" y="1566" text-anchor="middle" font-size="12" font-weight="600" fill="#26215C" font-family="Arial,Helvetica,sans-serif">Communication</text>
+<text x="238" y="1582" text-anchor="middle" font-size="9.5" fill="#534AB7" font-family="Arial,Helvetica,sans-serif">Publication · explanation</text>
+<text x="238" y="1598" text-anchor="middle" font-size="9.5" fill="#534AB7" font-family="Arial,Helvetica,sans-serif">Supabase · Vercel</text>
+<rect x="334" y="1544" width="162" height="72" rx="8" fill="#e4d8f8" stroke="#6846a8" stroke-width="0.8"/>
+<path d="M352 1552 l14 0 l-5 10 l0 9 l-4 0 l0-9z" fill="none" stroke="#6846a8" stroke-width="1.1" stroke-linejoin="round"/>
+<text x="414" y="1566" text-anchor="middle" font-size="12" font-weight="600" fill="#26215C" font-family="Arial,Helvetica,sans-serif">Risk filtering</text>
+<text x="414" y="1582" text-anchor="middle" font-size="9.5" fill="#534AB7" font-family="Arial,Helvetica,sans-serif">Unverified cognition</text>
+<text x="414" y="1598" text-anchor="middle" font-size="9.5" fill="#534AB7" font-family="Arial,Helvetica,sans-serif">not published directly</text>
+<rect x="510" y="1544" width="182" height="72" rx="8" fill="#e4d8f8" stroke="#6846a8" stroke-width="0.8"/>
+<circle cx="530" cy="1558" r="4" fill="none" stroke="#6846a8" stroke-width="1.1"/>
+<path d="M524 1572 q6-4 12 0" fill="none" stroke="#6846a8" stroke-width="1.1"/>
+<circle cx="542" cy="1556" r="3.5" fill="none" stroke="#6846a8" stroke-width="1"/>
+<path d="M537 1570 q5-3 10 0" fill="none" stroke="#6846a8" stroke-width="1"/>
+<text x="598" y="1566" text-anchor="middle" font-size="12" font-weight="600" fill="#26215C" font-family="Arial,Helvetica,sans-serif">Public interaction</text>
+<text x="598" y="1582" text-anchor="middle" font-size="9.5" fill="#534AB7" font-family="Arial,Helvetica,sans-serif">Visitors · readers · users</text>
+<text x="598" y="1598" text-anchor="middle" font-size="9.5" fill="#534AB7" font-family="Arial,Helvetica,sans-serif">Feedback collection</text>
+<text x="400" y="1642" text-anchor="middle" font-size="10.5" font-weight="600" fill="#6846a8" font-family="Arial,Helvetica,sans-serif">W Purpose: convert internal cognition into sustainable public communication  ·  Survivability first</text>
+<text x="400" y="1658" text-anchor="middle" font-size="9.5" fill="#8b68c8" font-family="Arial,Helvetica,sans-serif">W is not censorship  ·  W does not decide  ·  W does not own judgment</text>
+<text x="400" y="1698" text-anchor="middle" font-size="10" fill="#6846a8" font-family="Arial,Helvetica,sans-serif">W Feedback  (no direct Q write)</text>
+<line x1="400" y1="1706" x2="400" y2="1732" stroke="#6846a8" stroke-width="1.3" marker-end="url(#arr)"/>
+<rect x="40" y="1734" width="680" height="218" rx="10" fill="#faeeda" stroke="#9a6a00" stroke-width="1.2"/>
+<text x="60" y="1766" font-size="13" font-weight="700" fill="#9a6a00" font-family="Arial,Helvetica,sans-serif">④</text>
+<text x="60" y="1784" font-size="13" font-weight="700" fill="#9a6a00" font-family="Arial,Helvetica,sans-serif">Feedback Loop</text>
+<text x="60" y="1804" font-size="10" fill="#9a6a00" font-family="Arial,Helvetica,sans-serif">Isolated &amp; Auditable</text>
+<rect x="148" y="1752" width="150" height="64" rx="8" fill="#fac775" stroke="#9a6a00" stroke-width="0.8"/>
+<path d="M165 1762 h11 a3 3 0 0 1 3 3 v8 a3 3 0 0 1-3 3 h-5 l-4 4 v-4 h-2 a3 3 0 0 1-3-3 v-8 a3 3 0 0 1 3-3z" fill="none" stroke="#9a6a00" stroke-width="1.1"/>
+<text x="223" y="1772" text-anchor="middle" font-size="12" font-weight="700" fill="#412402" font-family="Arial,Helvetica,sans-serif">W Feedback</text>
+<text x="223" y="1788" text-anchor="middle" font-size="9.5" fill="#633806" font-family="Arial,Helvetica,sans-serif">feedback_queue</text>
+<text x="223" y="1803" text-anchor="middle" font-size="9.5" fill="#633806" font-family="Arial,Helvetica,sans-serif">entity_uuid anchor</text>
+<line x1="298" y1="1784" x2="326" y2="1784" stroke="#9a6a00" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="326" y="1752" width="150" height="64" rx="8" fill="#fac775" stroke="#9a6a00" stroke-width="0.8"/>
+<rect x="344" y="1762" width="11" height="14" rx="1.5" fill="none" stroke="#9a6a00" stroke-width="1.1"/>
+<line x1="346" y1="1767" x2="353" y2="1767" stroke="#9a6a00" stroke-width="0.9"/>
+<line x1="346" y1="1771" x2="353" y2="1771" stroke="#9a6a00" stroke-width="0.9"/>
+<text x="401" y="1772" text-anchor="middle" font-size="12" font-weight="700" fill="#412402" font-family="Arial,Helvetica,sans-serif">Audit</text>
+<text x="401" y="1788" text-anchor="middle" font-size="9.5" fill="#633806" font-family="Arial,Helvetica,sans-serif">Isolated · traceable</text>
+<text x="401" y="1803" text-anchor="middle" font-size="9.5" fill="#633806" font-family="Arial,Helvetica,sans-serif">claims only</text>
+<line x1="476" y1="1784" x2="504" y2="1784" stroke="#9a6a00" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="504" y="1752" width="162" height="64" rx="8" fill="#fac775" stroke="#9a6a00" stroke-width="0.8"/>
+<rect x="520" y="1762" width="13" height="9" rx="2" fill="none" stroke="#9a6a00" stroke-width="1.1"/>
+<path d="M522 1762 l-2-5 h9 l-2 5" fill="none" stroke="#9a6a00" stroke-width="1"/>
+<text x="585" y="1772" text-anchor="middle" font-size="12" font-weight="700" fill="#412402" font-family="Arial,Helvetica,sans-serif">Absorption</text>
+<text x="585" y="1788" text-anchor="middle" font-size="9.5" fill="#633806" font-family="Arial,Helvetica,sans-serif">W cannot modify</text>
+<text x="585" y="1803" text-anchor="middle" font-size="9.5" fill="#633806" font-family="Arial,Helvetica,sans-serif">Q directly</text>
+<rect x="504" y="1828" width="210" height="54" rx="6" fill="none" stroke="#b24538" stroke-width="1.2" stroke-dasharray="4 3"/>
+<circle cx="520" cy="1849" r="6.5" fill="none" stroke="#b24538" stroke-width="1.2"/>
+<line x1="514" y1="1849" x2="526" y2="1849" stroke="#b24538" stroke-width="1.4"/>
+<text x="609" y="1838" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b24538" font-family="Arial,Helvetica,sans-serif">Boundary Rule  (ADR-116):</text>
+<text x="609" y="1853" text-anchor="middle" font-size="9.5" fill="#b24538" font-family="Arial,Helvetica,sans-serif">W → Q direct write</text>
+<text x="609" y="1868" text-anchor="middle" font-size="9.5" fill="#b24538" font-family="Arial,Helvetica,sans-serif">permanently prohibited</text>
+<line x1="585" y1="1816" x2="585" y2="1828" stroke="#b24538" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="326" y="1910" text-anchor="middle" font-size="10" fill="#9a6a00" font-family="Arial,Helvetica,sans-serif">Absorbed (auditable claims only  ·  human approval required)</text>
+<line x1="326" y1="1918" x2="326" y2="1946" stroke="#9a6a00" stroke-width="1.2" marker-end="url(#arr)"/>
+<rect x="40" y="1948" width="680" height="140" rx="10" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.2"/>
+<text x="60" y="1978" font-size="13" font-weight="700" fill="#0f6e56" font-family="Arial,Helvetica,sans-serif">⑤</text>
+<text x="60" y="1996" font-size="13" font-weight="700" fill="#0f6e56" font-family="Arial,Helvetica,sans-serif">Return to Q</text>
+<rect x="152" y="1966" width="550" height="64" rx="8" fill="#9FE1CB" stroke="#0f6e56" stroke-width="0.8"/>
+<ellipse cx="180" cy="1984" rx="11" ry="4.5" fill="none" stroke="#0f6e56" stroke-width="1.1"/>
+<rect x="169" y="1984" width="22" height="14" fill="none" stroke="#0f6e56" stroke-width="1.1"/>
+<ellipse cx="180" cy="1998" rx="11" ry="4.5" fill="none" stroke="#0f6e56" stroke-width="1.1"/>
+<text x="427" y="1986" text-anchor="middle" font-size="13" font-weight="700" fill="#04342C" font-family="Arial,Helvetica,sans-serif">Absorbed into Q (via controlled process)</text>
+<text x="427" y="2002" text-anchor="middle" font-size="9.5" fill="#085041" font-family="Arial,Helvetica,sans-serif">Becomes evidence · updates graph / timeline / claims · re-enters R0–R7 pipeline</text>
+<text x="400" y="2062" text-anchor="middle" font-size="10.5" font-style="italic" fill="#0f6e56" font-family="Arial,Helvetica,sans-serif">Closes the loop: Reality → Decision → Feedback → Evolution</text>
+<rect x="40" y="2100" width="680" height="376" rx="10" fill="#f0efeb" stroke="#c9c2b8" stroke-width="0.8"/>
+<text x="60" y="2128" font-size="13" font-weight="700" fill="#20201f" font-family="Arial,Helvetica,sans-serif">⑥  Principle Governance</text>
+<line x1="52" y1="2136" x2="708" y2="2136" stroke="#c9c2b8" stroke-width="0.5"/>
+<text x="96" y="2160" font-size="12" font-weight="700" fill="#20201f" font-family="Arial,Helvetica,sans-serif">Q Layer</text>
+<text x="72" y="2180" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Truth first  ·  R0–R7 sovereign</text>
+<text x="72" y="2197" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Reality  ·  Evidence  ·  Entity</text>
+<text x="72" y="2214" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Graph  ·  Timeline  ·  Claims</text>
+<text x="72" y="2231" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Assessment  ·  Decision</text>
+<text x="316" y="2160" font-size="12" font-weight="700" fill="#20201f" font-family="Arial,Helvetica,sans-serif">W Layer</text>
+<text x="292" y="2180" font-size="10" font-weight="600" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Survivability first</text>
+<text x="292" y="2197" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Communication  ·  Risk filtering</text>
+<text x="292" y="2214" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Public = anyone outside Q</text>
+<text x="292" y="2231" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Feedback collection only</text>
+<text x="532" y="2160" font-size="12" font-weight="700" fill="#20201f" font-family="Arial,Helvetica,sans-serif">Not Symmetric by Design</text>
+<text x="510" y="2180" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Content never pre-judged</text>
+<text x="510" y="2197" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Confidence handles uncertainty</text>
+<text x="510" y="2214" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Tolerable error  ·  not false certainty</text>
+<text x="510" y="2231" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Max sustainable truth transmission</text>
+<line x1="52" y1="2248" x2="708" y2="2248" stroke="#c9c2b8" stroke-width="0.5" stroke-dasharray="4 3"/>
+<text x="380" y="2270" text-anchor="middle" font-size="10.5" font-weight="700" fill="#20201f" font-family="Arial,Helvetica,sans-serif">Naming Firewall  ·  ADR-117</text>
+<text x="72" y="2290" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">CORE = supreme constraint</text>
+<text x="72" y="2306" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">L0–L7 = data workflow (design intent · not DDL)</text>
+<text x="292" y="2290" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">R0–R7 = reasoning layer (old P0–P7)</text>
+<text x="292" y="2306" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">D0–D5 = driver rank (causal height)</text>
+<text x="528" y="2290" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">A0–A4 = action priority (R7 output)</text>
+<text x="528" y="2306" font-size="10" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Old P-prefix = historical  ·  not backfilled</text>
+<line x1="52" y1="2322" x2="708" y2="2322" stroke="#c9c2b8" stroke-width="0.5" stroke-dasharray="4 3"/>
+<rect x="72" y="2336" width="16" height="11" rx="2" fill="none" stroke="#66625c" stroke-width="1"/>
+<line x1="68" y1="2347" x2="92" y2="2347" stroke="#66625c" stroke-width="1.1"/>
+<text x="138" y="2340" font-size="10" font-weight="600" fill="#20201f" font-family="Arial,Helvetica,sans-serif">Q ≈ Git repository</text>
+<text x="138" y="2356" font-size="9.5" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Internal truth &amp; decision workspace</text>
+<text x="380" y="2340" text-anchor="middle" font-size="13" fill="#66625c" font-family="Arial,Helvetica,sans-serif">⇄</text>
+<path d="M590 2330 q8-10 12-8 q2 4-8 12" fill="none" stroke="#66625c" stroke-width="1.1"/>
+<circle cx="596" cy="2334" r="2.5" fill="none" stroke="#66625c" stroke-width="1"/>
+<text x="614" y="2340" font-size="10" font-weight="600" fill="#20201f" font-family="Arial,Helvetica,sans-serif">W ≈ Production deployment</text>
+<text x="614" y="2356" font-size="9.5" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Public communication workspace</text>
+<line x1="52" y1="2372" x2="708" y2="2372" stroke="#c9c2b8" stroke-width="0.5"/>
+<text x="380" y="2392" text-anchor="middle" font-size="10" font-weight="700" fill="#66625c" font-family="Arial,Helvetica,sans-serif">SQLV3 Phase 2 Sealed  ·  Phase 2.5 Architecture Closure Sealed  ·  checkpoint-118</text>
+<text x="380" y="2410" text-anchor="middle" font-size="9.5" fill="#66625c" font-family="Arial,Helvetica,sans-serif">107 Feedback Absorption  ·  110 Edge Identity Design  ·  113 Edge DDL  ·  115 Ingest Write Path  ·  116 W Schema Alignment</text>
+<text x="380" y="2426" text-anchor="middle" font-size="9.5" fill="#66625c" font-family="Arial,Helvetica,sans-serif">ADR-116 W Layer Re-definition — Accepted  ·  ADR-117 CCC V6 Chain Structure — Accepted</text>
+<text x="380" y="2442" text-anchor="middle" font-size="9.5" font-weight="600" fill="#4a7abf" font-family="Arial,Helvetica,sans-serif">ADR-117 Amendment 01 CORE Epistemic &amp; Architecture Boundary — Accepted  ·  checkpoint-118</text>
+<text x="380" y="2458" text-anchor="middle" font-size="9.5" fill="#66625c" font-family="Arial,Helvetica,sans-serif">Phase 1 = knowledge base  ·  Phase 2 = cognitive system  ·  Phase 2.5 = architecture expressed</text>
+<rect x="40" y="2496" width="680" height="132" rx="8" fill="#1a1a1a"/>
+<text x="60" y="2522" font-size="11" font-weight="700" fill="#ffffff" font-family="Arial,Helvetica,sans-serif">Key upgrades from V5 → V6</text>
+<text x="60" y="2542" font-size="9.5" fill="#c9c2b8" font-family="Arial,Helvetica,sans-serif">✓  CORE: Mission · Driver Chain D0–D5 · 14 Principles (incl. Action Boundary Group 5–8) · 13 Forbidden Rules</text>
+<text x="60" y="2558" font-size="9.5" fill="#c9c2b8" font-family="Arial,Helvetica,sans-serif">✓  Naming Firewall: CORE / L0–L7 / R0–R7 / D0–D5 / A0–A4  ·  Language Policy v0.1  ·  checkpoint-118</text>
+<text x="60" y="2574" font-size="9.5" fill="#c9c2b8" font-family="Arial,Helvetica,sans-serif">✓  ADR-116 W Layer  ·  ADR-117 V6 Chain Structure  ·  ADR-117 Amendment 01 Epistemic Boundary — all Accepted</text>
+<text x="60" y="2590" font-size="9.5" fill="#c9c2b8" font-family="Arial,Helvetica,sans-serif">✓  Full feedback loop  ·  Edge Identity  ·  Q/W sovereignty  ·  L0–L7 design intent locked</text>
+<line x1="60" y1="2604" x2="700" y2="2604" stroke="#333" stroke-width="0.4"/>
+<text x="60" y="2618" font-size="9" fill="#555555" font-family="Arial,Helvetica,sans-serif">Disagreement is not noise. Disagreement is diagnostic input.  ·  CCC is not an oracle. CCC is a constrained judgment system under incomplete information.</text>
+</svg>
