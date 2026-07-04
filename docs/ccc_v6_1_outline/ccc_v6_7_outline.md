@@ -246,6 +246,28 @@ Stable architecture. Evolving intelligence.
 稳定的架构。无限演化的智能。
 ```
 
+## I.9 Architecture Writing Discipline
+
+```
+Core documents define principles, not explanations.
+Explanations belong to Doctrine, Reality Tests, ADRs, or Engineering Notes.
+
+When a principle can no longer be expressed as an axiom,
+it should evolve into its own doctrine — not expand the Core.
+```
+
+```
+Core 负责定义公理，不负责解释公理。
+解释属于 Doctrine、Reality Test、ADR 或 Engineering Note。
+任何无法继续保持公理形式的内容，都应独立成为 Doctrine，
+而不是不断膨胀 Core。
+```
+
+This governs how every part of this outline is written, not only
+III.20. A section that starts accumulating examples, justification,
+or engineering detail has outgrown its place — the fix is to spin
+off a new Doctrine or Engineering Note, not to let the section grow.
+
 ---
 
 # Part II — Cognitive Pipeline
@@ -1001,48 +1023,67 @@ given real resource and information constraints.
 ```
 Question authority without presuming falsehood.
 Question claims without presuming truth.
+Authority is evidence, not verdict — it adjusts confidence weight,
+it does not determine truth or falsehood.
+```
 
-Authority is evidence, not verdict.
-It adjusts confidence weight — it does not determine truth or falsehood.
+**Discipline for this section:** this doctrine stays axiomatic, not
+expansive. Each node in the chain answers exactly three questions —
+What is it? What is it not? Where does it belong? — and no more.
+If a future addition cannot be stated this way, it belongs in a
+Reality Test finding, not in III.20.
 
-Separate:
-  Observation   — what was directly perceived or received
-  Evidence      — what has been verified and source-anchored
-  Inference     — what is reasonably derived from evidence
-  Judgment      — what is concluded after calibration
-  Action        — what is executed based on judgment
+```
+Observation → Evidence → Inference → Judgment → Decision → Action → Feedback → Reality
+```
 
-Observation is not evidence.
-Evidence is not inference.
-Inference is not judgment.
-Judgment is not action.
-These five must never collapse into each other.
+| Node | What is it? | What is it not? | Where does it belong? |
+|---|---|---|---|
+| Observation | What was directly perceived or received | Evidence | L1 Reality Intake |
+| Evidence | What has been verified and source-anchored | Inference | L2 Source & Claim Registration |
+| Inference | What is reasonably derived from evidence | Judgment | L4 Evidence & Calibration |
+| Judgment | What is concluded after calibration | Action | L4/L6 Calibration → Decision |
+| Decision | What is chosen, before resources committed | Commitment | L6 Decision |
+| Action | What is executed based on judgment | Feedback | L6 Commitment → Action |
+| Feedback | What is learned after action meets reality | Reality itself | L7 Feedback loop |
 
+```
 Confidence measures uncertainty; it never replaces reality.
 Confidence 0.85 describes our epistemic state — not the state of the world.
 ```
 
-**Architectural mapping:**
-
-```
-Question authority...           → Source Hygiene (L1/L2)
-Question claims...              → Claim Intake, Review Queue (L2/L3)
-Separate observation/evidence/
-  inference/judgment...         → L3–L6 layer boundary discipline
-Confidence measures uncertainty → L4 Four-Level Calibration + SCG
-Action...                       → L6 Decision/Commitment/Action
-                                  + L7 Feedback loop
-```
-
-This doctrine does not add a new capability.
-It names what CCC has been doing across all layers since V6.
-The chain is now complete and explicitly closed:
-
-```
-Observation → Evidence → Inference → Judgment → Action → Feedback → Reality
-```
+This doctrine adds no new capability. It names what CCC has done
+across all layers since V6, and closes the chain explicitly.
 
 ---
+
+## III.21 Three Orthogonal Axes
+
+CCC runs on three axes simultaneously. Each answers one question only.
+The seven layers are the engineering architecture; these axes are the
+runtime coordinate system.
+
+```
+Reality Axis      Reality → Observation → Evidence → Reality Test
+                  Question: What happened in the world?
+                  Guards against: drifting away from reality.
+
+Epistemic Axis    Observation → Evidence → Inference → Judgment → Confidence
+                  Question: What do I know, and to what degree?
+                  Guards against: mistaking inference for fact.
+
+Decision Axis     Prediction → Decision → Commitment → Action → Feedback
+                  Question: What should I do now?
+                  Guards against: cognition without action.
+```
+
+A well-formed judgment sits correctly on all three axes at once:
+grounded in Reality, calibrated on the Epistemic axis, and resolved
+into a specific point on the Decision axis. A failure on any one axis
+is a distinct failure mode — confusing them produces the errors this
+doctrine exists to prevent.
+
+
 
 # Part IV — Evolution
 
@@ -1135,6 +1176,23 @@ Phase 3  continuous evolution              starting
          ④ Close full pipeline to checkpoint
          ⑤ Rerun 24 HELD rows as Regression Test
 ```
+
+### IV.5.1 V6.7 Milestone — Evolution Philosophy
+
+```
+V6.7 completed the transition from boundary-driven architecture
+to epistemically-governed cognition.
+
+Future evolution should primarily arise from Reality Tests
+rather than continued expansion of principles.
+```
+
+This is Evolution Philosophy, not Core Principle — it describes how
+CCC maintains itself, not a law the world obeys. It stays in Part IV
+so a future Reality Test that genuinely requires a new Core Principle
+is never blocked by a rule against adding one.
+
+commit 548b1bf (III.20 + Principle 26) is the reference point.
 
 ## IV.6 Open Items
 
