@@ -160,6 +160,7 @@ Event is not the cause. Event is the manifestation. Driver is the cause.
 23. Each participant is responsible only for matters within their own authority and control. CCC does not assume responsibility for another party's judgment, investigation, or decision.
 24. Disclose what is necessary for the current procedure. Do not voluntarily expose analysis, strategy, or information unrelated to the matter requiring determination.
 25. When the operational environment is asymmetric or insufficiently understood, default to Secondary Harm Prevention. Escalate to Offensive Defense only when evidence, procedural understanding, and resources are sufficient.
+26. Question authority without presuming falsehood. Question claims without presuming truth. Separate observation, evidence, inference, judgment, and action. Confidence measures uncertainty; it never replaces reality.
 
 ## I.4 Irreducible Core
 
@@ -995,6 +996,52 @@ Where conditions for Offensive Defense are not met:
 Secondary Harm Prevention is not weakness. It is optimal strategy
 given real resource and information constraints.
 
+## III.20 CCC Epistemic Doctrine
+
+```
+Question authority without presuming falsehood.
+Question claims without presuming truth.
+
+Authority is evidence, not verdict.
+It adjusts confidence weight — it does not determine truth or falsehood.
+
+Separate:
+  Observation   — what was directly perceived or received
+  Evidence      — what has been verified and source-anchored
+  Inference     — what is reasonably derived from evidence
+  Judgment      — what is concluded after calibration
+  Action        — what is executed based on judgment
+
+Observation is not evidence.
+Evidence is not inference.
+Inference is not judgment.
+Judgment is not action.
+These five must never collapse into each other.
+
+Confidence measures uncertainty; it never replaces reality.
+Confidence 0.85 describes our epistemic state — not the state of the world.
+```
+
+**Architectural mapping:**
+
+```
+Question authority...           → Source Hygiene (L1/L2)
+Question claims...              → Claim Intake, Review Queue (L2/L3)
+Separate observation/evidence/
+  inference/judgment...         → L3–L6 layer boundary discipline
+Confidence measures uncertainty → L4 Four-Level Calibration + SCG
+Action...                       → L6 Decision/Commitment/Action
+                                  + L7 Feedback loop
+```
+
+This doctrine does not add a new capability.
+It names what CCC has been doing across all layers since V6.
+The chain is now complete and explicitly closed:
+
+```
+Observation → Evidence → Inference → Judgment → Action → Feedback → Reality
+```
+
 ---
 
 # Part IV — Evolution
@@ -1176,7 +1223,7 @@ V6.7 version chain:
 ```
 File:       ccc_v6_7_outline.md
 Replaces:   ccc_v6_6_outline.md
-Version:    V6.7 candidate / draft — Responsibility & Exposure Boundary
+Version:    V6.7 candidate / draft — Responsibility & Exposure Boundary + Epistemic Doctrine
 Destination: docs/ccc_v6_1_outline/ccc_v6_7_outline.md
 Scope:      Four-part governed cognitive architecture + Purpose layer
 Based on:   checkpoint-148 · ADR-118 · commits e04784c · a1c61bc
