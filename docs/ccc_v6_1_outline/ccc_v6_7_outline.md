@@ -246,10 +246,25 @@ Stable architecture. Evolving intelligence.
 稳定的架构。无限演化的智能。
 ```
 
-## I.9 Architecture Writing Discipline
+## I.9 Architecture Governance
 
 ```
-Core documents define principles, not explanations.
+This section governs where knowledge is allowed to live —
+not merely how documents are worded.
+```
+
+**Knowledge placement:**
+
+| Layer | Defines |
+|---|---|
+| Core | Axioms — irreducible, non-negotiable principles |
+| Doctrine | Explanations and reasoning behind a principle |
+| ADR | Architecture decisions and their tradeoffs |
+| Reality Test | Findings from actual operation against reality |
+| Engineering Note | Implementation detail and mechanism |
+
+```
+Core defines axioms, not explanations.
 Explanations belong to Doctrine, Reality Tests, ADRs, or Engineering Notes.
 
 When a principle can no longer be expressed as an axiom,
@@ -257,16 +272,22 @@ it should evolve into its own doctrine — not expand the Core.
 ```
 
 ```
-Core 负责定义公理，不负责解释公理。
+Core 定义公理，不定义解释。
 解释属于 Doctrine、Reality Test、ADR 或 Engineering Note。
 任何无法继续保持公理形式的内容，都应独立成为 Doctrine，
 而不是不断膨胀 Core。
 ```
 
+### I.9.1 Writing Discipline
+
 This governs how every part of this outline is written, not only
 III.20. A section that starts accumulating examples, justification,
 or engineering detail has outgrown its place — the fix is to spin
 off a new Doctrine or Engineering Note, not to let the section grow.
+
+Future additions to this section (document lifecycle, Canonical vs.
+Draft status, Doctrine upgrade paths) extend Architecture Governance
+without requiring a renamed heading.
 
 ---
 
@@ -1193,6 +1214,43 @@ so a future Reality Test that genuinely requires a new Core Principle
 is never blocked by a rule against adding one.
 
 commit 548b1bf (III.20 + Principle 26) is the reference point.
+
+### IV.5.2 Three Closed Loops
+
+V6.7's structure resolves into three independent but mutually
+supporting loops. Each governs a different question; none replaces
+the other two.
+
+```
+Evolution Loop            Epistemology Loop         Governance Loop
+(how the system changes)  (how the system knows)    (how knowledge settles)
+
+Reality                   Observation                Core
+  ↓                         ↓                          ↓
+Architecture              Evidence                   Doctrine
+  ↓                         ↓                          ↓
+Engineering               Inference                  ADR
+  ↓                         ↓                          ↓
+Reality Test              Judgment                   Engineering
+  ↓                         ↓                          ↓
+Architecture              Decision                   Reality Test
+                            ↓                          ↓
+                          Action                     Archive
+                            ↓
+                          Feedback
+                            ↓
+                          Reality
+```
+
+```
+Evolution Loop     — governs how CCC changes over time
+Epistemology Loop  — governs how CCC forms a single judgment (III.20/III.21)
+Governance Loop    — governs where a piece of knowledge is allowed to live (I.9)
+```
+
+A mature system does not merely have an architecture. It has an
+architecture for governing how that architecture evolves, knows,
+and settles. These three loops are that architecture.
 
 ## IV.6 Open Items
 
